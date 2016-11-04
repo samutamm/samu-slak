@@ -2,7 +2,8 @@ var express = require('express'),
     morgan = require('morgan'),
     compression = require('compression'),
     bodyParser = require('body-parser'),
-    session = require('express-session');
+    session = require('express-session'),
+    path = require('path');
 
 module.exports = function() {
   var app = express();
@@ -23,8 +24,10 @@ module.exports = function() {
     secret: process.env.SESSION
   }));
 
+  const staticPath = path.join(__dirname, './../../client/');
+  app.use('/', express.static(staticPath));
+
   require('../app/routes/hello.server.route')(app);
 
-  app.use(express.static('public'));
   return app;
 }
