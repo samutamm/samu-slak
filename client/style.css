@@ -1,0 +1,38 @@
+/****************************************
+  Layout
+*****************************************/
+
+/**
+ * Main Layout
+ */
+
+.app {
+  display: flex;
+  min-width: 200px;
+  align-items: center;
+  justify-content: center;
+}
+
+.primary-aside {
+  width: 12rem;
+}
+
+.primary-aside ul {
+  list-style: none;
+  margin: 0;
+}
+
+.primary-aside a {
+  display: block;
+  padding: 0.6em;
+}
+
+.primary-aside a.active {
+  color: #fff;
+  background-color: #2297D1;
+}
+
+main {
+  flex: 1;
+  margin-left: 2em;
+}
