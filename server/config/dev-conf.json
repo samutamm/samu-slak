@@ -1,0 +1,6 @@
+{
+	"endpoints": {
+		"login": "http://localhost:3030/login",
+		"checkToken": "http://localhost:3030/check"
+	}
+}
