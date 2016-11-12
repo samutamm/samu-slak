@@ -7,11 +7,11 @@ function request() {
   };
 }
 
-export function receiveToken(session) {
-  localStorage.setItem('token', session.token);
+export function receiveToken(token) {
+  localStorage.setItem('token', token);
   return {
     type: 'AUTH_SET_TOKEN',
-    session: session
+    session: token
   };
 }
 
@@ -33,18 +33,20 @@ function canFetch(state) {
   return !state.isChecking;
 }
 
-function sendAuthentication(url, username, password) {
+function sendAuthentication(username, password) {
   return dispatch => {
     dispatch(request());
     axios.get('/login', {
       url: "/login",
       method: 'get',
+      baseURL: "http://localhost:3030",
       auth: {
-        username: 'janedoe',
-        password: 's00pers3cret'
+        username: username,
+        password: password
       }
     }).then(function (response) {
-      dispatch(receiveToken(reponse.responseJSON));
+      dispatch(receiveToken(response.data.token));
+      debugger;
       //appHistory.push('/profile');
     }).catch(function (error) {
       dispatch(receiveError('Error while locking in. Please check credentials.'));
@@ -52,47 +54,44 @@ function sendAuthentication(url, username, password) {
   }
 }
 
-function sendToken(url, token, role) {
+function sendToken(token, role) {
   if (role === undefined) {
     role = "ALL";
   }
   return dispatch => {
     dispatch(request());
-    $.ajax({
-      url: url,
-      dataType: 'json',
-      type: "GET",
-      async: true,
-      headers: {
-        "Authorization": "Basic " + token + " " + role
-      },
-      complete: function(response) {
-        if (response.status === 200) {
-          dispatch(tokenOK());
-        } else {
-          dispatch(receiveError('Please log in first!'));
-          //appHistory.push('/login');
-        }
+    axios.get('/checkToken', {
+      url: "/checkToken",
+      baseURL: "",
+      method: 'get',
+      auth: {
+        username: token,
+        password: role
       }
+    }).then(function (response) {
+      dispatch(tokenOK());
+    }).catch(function (error) {
+      dispatch(receiveError('Please log in first!'));
+      //appHistory.push('/login');
     });
   }
 }
 
-export function authenticate(url, username, password) {
+export function authenticate(username, password) {
   return (dispatch, getState) => {
     if (canFetch(getState().user)) {
-      return dispatch(sendAuthentication(url, username, password))
+      return dispatch(sendAuthentication(username, password))
     } else {
       return Promise.resolve()
     }
   }
 }
 
-export function checkToken(url, role) {
+export function checkToken(role) {
   return (dispatch, getState) => {
     let token = localStorage.getItem('token');
     if (canFetch(getState().loginReducer) && token !== undefined) {
-      return dispatch(sendToken(url, token, role))
+      return dispatch(sendToken(token, role))
     } else {
       return Promise.resolve()
     }

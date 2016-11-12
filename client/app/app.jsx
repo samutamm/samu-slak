@@ -43,7 +43,7 @@ const UserIsAuthenticated = UserAuthWrapper({
 
 render(
   <Provider store={store}>
-    <Router history={browserHistory}>
+    <Router history={history}>
       <Route component={MainLayout}>
         <Route path="/" component={UserIsAuthenticated(Home)} />
         <Route path="/login" component={Login} />
@@ -52,3 +52,5 @@ render(
   </Provider>,
   document.getElementById('app')
 );
+
+export default history;

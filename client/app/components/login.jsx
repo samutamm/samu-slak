@@ -15,28 +15,11 @@ function select(state, ownProps) {
 
 class LoginContainer extends Component {
 
-    componentWillMount() {
-      const { isAuthenticated, replace, redirect } = this.props
-      if (isAuthenticated) {
-        replace(redirect)
-      }
-    }
-
-    componentWillReceiveProps(nextProps) {
-      const { isAuthenticated, replace, redirect } = nextProps
-      const { isAuthenticated: wasAuthenticated } = this.props
-
-      if (!wasAuthenticated && isAuthenticated) {
-        replace(redirect)
-      }
-    }
-
     onClick(e) {
       e.preventDefault()
-      this.props.authenticate({ 
-        username: this.refs.username.value,
-        password: this.refs.password.value
-      })
+      this.props.authenticate(
+        this.refs.username.value,this.refs.password.value
+      )
     };
 
     render() {
