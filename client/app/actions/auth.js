@@ -1,5 +1,5 @@
 import {Map} from 'immutable';
-import {appHistory} from '../router.jsx';
+import axios from 'axios';
 
 function request() {
   return {
@@ -30,33 +30,24 @@ function tokenOK() {
 }
 
 function canFetch(state) {
-  const isChecking = state.getIn(['session', 'isChecking']);
-  if(!isChecking) {
-    return true;
-  } else {
-    return false;
-  }
+  return !state.isChecking;
 }
 
 function sendAuthentication(url, username, password) {
   return dispatch => {
     dispatch(request());
-    $.ajax({
-      url: url,
-      dataType: 'json',
-      type: "GET",
-      async: true,
-      headers: {
-        "Authorization": "Basic " + btoa(username + ":" + password)
-      },
-      complete: function(reponse) {
-        if (reponse.status === 200) {
-          dispatch(receiveToken(reponse.responseJSON));
-          appHistory.push('/profile');
-        } else {
-          dispatch(receiveError('Error while locking in. Please check credentials.'));
-        }
+    axios.get('/login', {
+      url: "/login",
+      method: 'get',
+      auth: {
+        username: 'janedoe',
+        password: 's00pers3cret'
       }
+    }).then(function (response) {
+      dispatch(receiveToken(reponse.responseJSON));
+      //appHistory.push('/profile');
+    }).catch(function (error) {
+      dispatch(receiveError('Error while locking in. Please check credentials.'));
     });
   }
 }
@@ -80,7 +71,7 @@ function sendToken(url, token, role) {
           dispatch(tokenOK());
         } else {
           dispatch(receiveError('Please log in first!'));
-          appHistory.push('/login');
+          //appHistory.push('/login');
         }
       }
     });
@@ -89,7 +80,7 @@ function sendToken(url, token, role) {
 
 export function authenticate(url, username, password) {
   return (dispatch, getState) => {
-    if (canFetch(getState().loginReducer)) {
+    if (canFetch(getState().user)) {
       return dispatch(sendAuthentication(url, username, password))
     } else {
       return Promise.resolve()
@@ -118,6 +109,6 @@ function logOut() {
 export function logoutAndRedirect() {
     return (dispatch, state) => {
         dispatch(logOut());
-        appHistory.push('/login');
+        //appHistory.push('/login');
     }
 }
