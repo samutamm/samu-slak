@@ -1,5 +1,6 @@
 import {Map} from 'immutable';
 import axios from 'axios';
+import { browserHistory } from 'react-router';
 
 function request() {
   return {
@@ -7,11 +8,12 @@ function request() {
   };
 }
 
-export function receiveToken(token) {
+export function receiveToken(redirect, token) {
   localStorage.setItem('token', token);
   return {
     type: 'AUTH_SET_TOKEN',
-    session: token
+    session: token,
+    redirect: redirect
   };
 }
 
@@ -30,7 +32,7 @@ function tokenOK() {
 }
 
 function canFetch(state) {
-  return !state.isChecking;
+  return !state.getIn(['session', 'isChecking']);
 }
 
 function sendAuthentication(username, password) {
@@ -45,9 +47,8 @@ function sendAuthentication(username, password) {
         password: password
       }
     }).then(function (response) {
-      dispatch(receiveToken(response.data.token));
-      debugger;
-      //appHistory.push('/profile');
+      dispatch(receiveToken('/messages', response.data.token));
+      browserHistory.push('/messages');
     }).catch(function (error) {
       dispatch(receiveError('Error while locking in. Please check credentials.'));
     });
@@ -72,14 +73,14 @@ function sendToken(token, role) {
       dispatch(tokenOK());
     }).catch(function (error) {
       dispatch(receiveError('Please log in first!'));
-      //appHistory.push('/login');
+      browserHistory.push('/login')
     });
   }
 }
 
 export function authenticate(username, password) {
   return (dispatch, getState) => {
-    if (canFetch(getState().user)) {
+    if (canFetch(getState().auth)) {
       return dispatch(sendAuthentication(username, password))
     } else {
       return Promise.resolve()
@@ -90,7 +91,7 @@ export function authenticate(username, password) {
 export function checkToken(role) {
   return (dispatch, getState) => {
     let token = localStorage.getItem('token');
-    if (canFetch(getState().loginReducer) && token !== undefined) {
+    if (canFetch(getState().auth) && token !== undefined) {
       return dispatch(sendToken(token, role))
     } else {
       return Promise.resolve()

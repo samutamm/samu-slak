@@ -75,27 +75,25 @@
 	
 	var _reactRouterRedux = __webpack_require__(/*! react-router-redux */ 262);
 	
-	var _reduxAuthWrapper = __webpack_require__(/*! redux-auth-wrapper */ 267);
-	
 	var _mainLayout = __webpack_require__(/*! ./components/layouts/main-layout.jsx */ 269);
 	
 	var _mainLayout2 = _interopRequireDefault(_mainLayout);
 	
-	var _home = __webpack_require__(/*! ./components/home.jsx */ 270);
+	var _messagesLayout = __webpack_require__(/*! ./components/layouts/messages-layout.jsx */ 270);
+	
+	var _messagesLayout2 = _interopRequireDefault(_messagesLayout);
+	
+	var _home = __webpack_require__(/*! ./components/home.jsx */ 271);
 	
 	var _home2 = _interopRequireDefault(_home);
 	
-	var _login = __webpack_require__(/*! ./components/login.jsx */ 271);
+	var _login = __webpack_require__(/*! ./components/login.jsx */ 272);
 	
-	var _login2 = _interopRequireDefault(_login);
+	var _authReducer = __webpack_require__(/*! ./reducers/auth-reducer */ 300);
 	
-	var _userReducer = __webpack_require__(/*! ./reducers/userReducer */ 299);
+	var _authReducer2 = _interopRequireDefault(_authReducer);
 	
-	var _userReducer2 = _interopRequireDefault(_userReducer);
-	
-	var _reducers = __webpack_require__(/*! ./reducers */ 300);
-	
-	var _reducers2 = _interopRequireDefault(_reducers);
+	var _AuthenticatedComponent = __webpack_require__(/*! ./components/AuthenticatedComponent.jsx */ 301);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -105,21 +103,12 @@
 	
 	var reducer = (0, _redux.combineReducers)({
 	  routing: _reactRouterRedux.routerReducer,
-	  user: _userReducer2.default
+	  auth: _authReducer2.default
 	});
 	
 	var store = (0, _redux.createStore)(reducer, (0, _redux.applyMiddleware)(loggerMiddleware, _reduxThunk2.default, routingMiddleware));
 	
 	var history = (0, _reactRouterRedux.syncHistoryWithStore)(_reactRouter.browserHistory, store);
-	
-	// Redirects to /login by default
-	var UserIsAuthenticated = (0, _reduxAuthWrapper.UserAuthWrapper)({
-	  authSelector: function authSelector(state) {
-	    return state.user;
-	  }, // how to get the user state
-	  redirectAction: _reactRouterRedux.routerActions.replace, // the redux action to dispatch for redirect
-	  wrapperDisplayName: 'UserIsAuthenticated' // a nice name for this auth check
-	});
 	
 	(0, _reactDom.render)(_react2.default.createElement(
 	  _reactRedux.Provider,
@@ -130,8 +119,9 @@
 	    _react2.default.createElement(
 	      _reactRouter.Route,
 	      { component: _mainLayout2.default },
-	      _react2.default.createElement(_reactRouter.Route, { path: '/', component: UserIsAuthenticated(_home2.default) }),
-	      _react2.default.createElement(_reactRouter.Route, { path: '/login', component: _login2.default })
+	      _react2.default.createElement(_reactRouter.Route, { path: '/', component: (0, _AuthenticatedComponent.requireAuthentication)(_home2.default) }),
+	      _react2.default.createElement(_reactRouter.Route, { path: '/login', component: _login.LoginContainer }),
+	      _react2.default.createElement(_reactRouter.Route, { path: '/messages', component: (0, _AuthenticatedComponent.requireAuthentication)(_messagesLayout2.default) })
 	    )
 	  )
 	), document.getElementById('app'));
@@ -30092,837 +30082,8 @@
 	}
 
 /***/ },
-/* 267 */
-/*!*******************************************!*\
-  !*** ./~/redux-auth-wrapper/lib/index.js ***!
-  \*******************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	exports.UserAuthWrapper = undefined;
-	
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-	
-	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-	
-	var _react = __webpack_require__(/*! react */ 1);
-	
-	var _react2 = _interopRequireDefault(_react);
-	
-	var _reactRedux = __webpack_require__(/*! react-redux */ 172);
-	
-	var _hoistNonReactStatics = __webpack_require__(/*! hoist-non-react-statics */ 200);
-	
-	var _hoistNonReactStatics2 = _interopRequireDefault(_hoistNonReactStatics);
-	
-	var _lodash = __webpack_require__(/*! lodash.isempty */ 268);
-	
-	var _lodash2 = _interopRequireDefault(_lodash);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-	
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-	
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-	
-	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-	
-	function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
-	
-	var defaults = {
-	  LoadingComponent: function LoadingComponent() {
-	    return null;
-	  }, // dont render anything while authenticating
-	  failureRedirectPath: '/login',
-	  FailureComponent: undefined,
-	  redirectQueryParamName: 'redirect',
-	  wrapperDisplayName: 'AuthWrapper',
-	  predicate: function predicate(x) {
-	    return !(0, _lodash2.default)(x);
-	  },
-	  authenticatingSelector: function authenticatingSelector() {
-	    return false;
-	  },
-	  allowRedirectBack: true,
-	  propMapper: function propMapper(_ref) {
-	    var redirect = _ref.redirect,
-	        authData = _ref.authData,
-	        isAuthenticating = _ref.isAuthenticating,
-	        failureRedirectPath = _ref.failureRedirectPath,
-	        otherProps = _objectWithoutProperties(_ref, ['redirect', 'authData', 'isAuthenticating', 'failureRedirectPath']);
-	
-	    return _extends({ authData: authData }, otherProps);
-	  } // eslint-disable-line no-unused-vars
-	};
-	
-	var UserAuthWrapper = exports.UserAuthWrapper = function UserAuthWrapper(args) {
-	  var _defaults$args = _extends({}, defaults, args),
-	      authSelector = _defaults$args.authSelector,
-	      authenticatingSelector = _defaults$args.authenticatingSelector,
-	      LoadingComponent = _defaults$args.LoadingComponent,
-	      failureRedirectPath = _defaults$args.failureRedirectPath,
-	      FailureComponent = _defaults$args.FailureComponent,
-	      wrapperDisplayName = _defaults$args.wrapperDisplayName,
-	      predicate = _defaults$args.predicate,
-	      allowRedirectBack = _defaults$args.allowRedirectBack,
-	      redirectAction = _defaults$args.redirectAction,
-	      redirectQueryParamName = _defaults$args.redirectQueryParamName,
-	      propMapper = _defaults$args.propMapper;
-	
-	  var isAuthorized = function isAuthorized(authData) {
-	    return predicate(authData);
-	  };
-	
-	  var createRedirect = function createRedirect(location, redirect, redirectPath) {
-	    var query = void 0;
-	    if (allowRedirectBack) {
-	      query = _defineProperty({}, redirectQueryParamName, '' + location.pathname + location.search);
-	    } else {
-	      query = {};
-	    }
-	
-	    redirect({
-	      pathname: redirectPath,
-	      query: query
-	    });
-	  };
-	
-	  var shouldRedirect = FailureComponent === undefined;
-	  var locationShape = _react.PropTypes.shape({
-	    pathname: _react.PropTypes.string.isRequired,
-	    search: _react.PropTypes.string.isRequired
-	  });
-	
-	  // Wraps the component that needs the auth enforcement
-	  function wrapComponent(DecoratedComponent) {
-	    var _dec, _class, _class2, _temp2;
-	
-	    var displayName = DecoratedComponent.displayName || DecoratedComponent.name || 'Component';
-	
-	    var mapDispatchToProps = function mapDispatchToProps(dispatch) {
-	      if (redirectAction !== undefined) {
-	        return { redirect: function redirect(args) {
-	            return dispatch(redirectAction(args));
-	          } };
-	      } else {
-	        return {};
-	      }
-	    };
-	
-	    var UserAuthWrapper = (_dec = (0, _reactRedux.connect)(function (state, ownProps) {
-	      return {
-	        authData: authSelector(state, ownProps),
-	        failureRedirectPath: typeof failureRedirectPath === 'function' ? failureRedirectPath(state, ownProps) : failureRedirectPath,
-	        isAuthenticating: authenticatingSelector(state, ownProps)
-	      };
-	    }, mapDispatchToProps), _dec(_class = (_temp2 = _class2 = function (_Component) {
-	      _inherits(UserAuthWrapper, _Component);
-	
-	      function UserAuthWrapper() {
-	        var _ref2;
-	
-	        var _temp, _this, _ret;
-	
-	        _classCallCheck(this, UserAuthWrapper);
-	
-	        for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-	          args[_key] = arguments[_key];
-	        }
-	
-	        return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref2 = UserAuthWrapper.__proto__ || Object.getPrototypeOf(UserAuthWrapper)).call.apply(_ref2, [this].concat(args))), _this), _this.getRedirectFunc = function (_ref3) {
-	          var redirect = _ref3.redirect;
-	
-	          if (redirect) {
-	            return redirect;
-	          } else {
-	            if (!_this.context.router.replace) {
-	              /* istanbul ignore next sanity */
-	              throw new Error('You must provide a router context (or use React-Router 2.x) if not passing a redirectAction to ' + wrapperDisplayName);
-	            } else {
-	              return _this.context.router.replace;
-	            }
-	          }
-	        }, _temp), _possibleConstructorReturn(_this, _ret);
-	      }
-	
-	      _createClass(UserAuthWrapper, [{
-	        key: 'componentWillMount',
-	        value: function componentWillMount() {
-	          if (!this.props.isAuthenticating && !isAuthorized(this.props.authData) && shouldRedirect) {
-	            createRedirect(this.props.location, this.getRedirectFunc(this.props), this.props.failureRedirectPath);
-	          }
-	        }
-	      }, {
-	        key: 'componentWillReceiveProps',
-	        value: function componentWillReceiveProps(nextProps) {
-	          var willBeAuthorized = isAuthorized(nextProps.authData);
-	          var willbeAuthenticating = nextProps.isAuthenticating;
-	          var wasAuthorized = isAuthorized(this.props.authData);
-	          var wasAuthenticating = this.props.isAuthenticating;
-	
-	          // Don't bother to redirect if:
-	          // 1. currently authenticating or FailureComponent is set
-	          if (willbeAuthenticating || !shouldRedirect) return;
-	
-	          // Redirect if:
-	          if ( // 1. Was authorized, but no longer
-	          wasAuthorized && !willBeAuthorized ||
-	          // 2. Was not authorized and authenticating
-	          wasAuthenticating && !willBeAuthorized) {
-	            createRedirect(nextProps.location, this.getRedirectFunc(nextProps), nextProps.failureRedirectPath);
-	          }
-	        }
-	      }, {
-	        key: 'render',
-	        value: function render() {
-	          // Allow everything but the replace aciton creator to be passed down
-	          // Includes route props from React-Router and authData
-	          var _props = this.props,
-	              authData = _props.authData,
-	              isAuthenticating = _props.isAuthenticating;
-	
-	          if (isAuthorized(authData)) {
-	            return _react2.default.createElement(DecoratedComponent, propMapper(this.props));
-	          } else if (isAuthenticating) {
-	            return _react2.default.createElement(LoadingComponent, propMapper(this.props));
-	          } else {
-	            // Display FailureComponent or nothing if FailureComponent is null
-	            // If FailureComponent is undefined user will never see this because
-	            // they will be redirected to failureRedirectPath
-	            return FailureComponent ? _react2.default.createElement(FailureComponent, propMapper(this.props)) : null;
-	          }
-	        }
-	      }]);
-	
-	      return UserAuthWrapper;
-	    }(_react.Component), _class2.displayName = wrapperDisplayName + '(' + displayName + ')', _class2.propTypes = {
-	      failureRedirectPath: _react.PropTypes.string.isRequired,
-	      location: shouldRedirect ? locationShape.isRequired : locationShape,
-	      redirect: _react.PropTypes.func,
-	      authData: _react.PropTypes.object
-	    }, _class2.contextTypes = {
-	      // Only used if no redirectAction specified
-	      router: _react.PropTypes.object
-	    }, _temp2)) || _class);
-	
-	
-	    return (0, _hoistNonReactStatics2.default)(UserAuthWrapper, DecoratedComponent);
-	  }
-	
-	  if (shouldRedirect) {
-	    wrapComponent.onEnter = function (store, nextState, replace) {
-	      var authData = authSelector(store.getState(), nextState);
-	      var isAuthenticating = authenticatingSelector(store.getState(), nextState);
-	
-	      if (!isAuthorized(authData) && !isAuthenticating) {
-	        var redirectPath = typeof failureRedirectPath === 'function' ? failureRedirectPath(store.getState(), nextState) : failureRedirectPath;
-	        createRedirect(nextState.location, replace, redirectPath);
-	      }
-	    };
-	  }
-	
-	  return wrapComponent;
-	};
-
-/***/ },
-/* 268 */
-/*!***********************************!*\
-  !*** ./~/lodash.isempty/index.js ***!
-  \***********************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	/* WEBPACK VAR INJECTION */(function(global, module) {/**
-	 * lodash (Custom Build) <https://lodash.com/>
-	 * Build: `lodash modularize exports="npm" -o ./`
-	 * Copyright jQuery Foundation and other contributors <https://jquery.org/>
-	 * Released under MIT license <https://lodash.com/license>
-	 * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
-	 * Copyright Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
-	 */
-	
-	/** Used as references for various `Number` constants. */
-	var MAX_SAFE_INTEGER = 9007199254740991;
-	
-	/** `Object#toString` result references. */
-	var argsTag = '[object Arguments]',
-	    funcTag = '[object Function]',
-	    genTag = '[object GeneratorFunction]',
-	    mapTag = '[object Map]',
-	    objectTag = '[object Object]',
-	    promiseTag = '[object Promise]',
-	    setTag = '[object Set]',
-	    weakMapTag = '[object WeakMap]';
-	
-	var dataViewTag = '[object DataView]';
-	
-	/**
-	 * Used to match `RegExp`
-	 * [syntax characters](http://ecma-international.org/ecma-262/7.0/#sec-patterns).
-	 */
-	var reRegExpChar = /[\\^$.*+?()[\]{}|]/g;
-	
-	/** Used to detect host constructors (Safari). */
-	var reIsHostCtor = /^\[object .+?Constructor\]$/;
-	
-	/** Detect free variable `global` from Node.js. */
-	var freeGlobal = typeof global == 'object' && global && global.Object === Object && global;
-	
-	/** Detect free variable `self`. */
-	var freeSelf = typeof self == 'object' && self && self.Object === Object && self;
-	
-	/** Used as a reference to the global object. */
-	var root = freeGlobal || freeSelf || Function('return this')();
-	
-	/** Detect free variable `exports`. */
-	var freeExports = typeof exports == 'object' && exports && !exports.nodeType && exports;
-	
-	/** Detect free variable `module`. */
-	var freeModule = freeExports && typeof module == 'object' && module && !module.nodeType && module;
-	
-	/** Detect the popular CommonJS extension `module.exports`. */
-	var moduleExports = freeModule && freeModule.exports === freeExports;
-	
-	/**
-	 * Gets the value at `key` of `object`.
-	 *
-	 * @private
-	 * @param {Object} [object] The object to query.
-	 * @param {string} key The key of the property to get.
-	 * @returns {*} Returns the property value.
-	 */
-	function getValue(object, key) {
-	  return object == null ? undefined : object[key];
-	}
-	
-	/**
-	 * Checks if `value` is a host object in IE < 9.
-	 *
-	 * @private
-	 * @param {*} value The value to check.
-	 * @returns {boolean} Returns `true` if `value` is a host object, else `false`.
-	 */
-	function isHostObject(value) {
-	  // Many host objects are `Object` objects that can coerce to strings
-	  // despite having improperly defined `toString` methods.
-	  var result = false;
-	  if (value != null && typeof value.toString != 'function') {
-	    try {
-	      result = !!(value + '');
-	    } catch (e) {}
-	  }
-	  return result;
-	}
-	
-	/**
-	 * Creates a unary function that invokes `func` with its argument transformed.
-	 *
-	 * @private
-	 * @param {Function} func The function to wrap.
-	 * @param {Function} transform The argument transform.
-	 * @returns {Function} Returns the new function.
-	 */
-	function overArg(func, transform) {
-	  return function(arg) {
-	    return func(transform(arg));
-	  };
-	}
-	
-	/** Used for built-in method references. */
-	var funcProto = Function.prototype,
-	    objectProto = Object.prototype;
-	
-	/** Used to detect overreaching core-js shims. */
-	var coreJsData = root['__core-js_shared__'];
-	
-	/** Used to detect methods masquerading as native. */
-	var maskSrcKey = (function() {
-	  var uid = /[^.]+$/.exec(coreJsData && coreJsData.keys && coreJsData.keys.IE_PROTO || '');
-	  return uid ? ('Symbol(src)_1.' + uid) : '';
-	}());
-	
-	/** Used to resolve the decompiled source of functions. */
-	var funcToString = funcProto.toString;
-	
-	/** Used to check objects for own properties. */
-	var hasOwnProperty = objectProto.hasOwnProperty;
-	
-	/**
-	 * Used to resolve the
-	 * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
-	 * of values.
-	 */
-	var objectToString = objectProto.toString;
-	
-	/** Used to detect if a method is native. */
-	var reIsNative = RegExp('^' +
-	  funcToString.call(hasOwnProperty).replace(reRegExpChar, '\\$&')
-	  .replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, '$1.*?') + '$'
-	);
-	
-	/** Built-in value references. */
-	var Buffer = moduleExports ? root.Buffer : undefined,
-	    propertyIsEnumerable = objectProto.propertyIsEnumerable;
-	
-	/* Built-in method references for those with the same name as other `lodash` methods. */
-	var nativeIsBuffer = Buffer ? Buffer.isBuffer : undefined,
-	    nativeKeys = overArg(Object.keys, Object);
-	
-	/* Built-in method references that are verified to be native. */
-	var DataView = getNative(root, 'DataView'),
-	    Map = getNative(root, 'Map'),
-	    Promise = getNative(root, 'Promise'),
-	    Set = getNative(root, 'Set'),
-	    WeakMap = getNative(root, 'WeakMap');
-	
-	/** Detect if properties shadowing those on `Object.prototype` are non-enumerable. */
-	var nonEnumShadows = !propertyIsEnumerable.call({ 'valueOf': 1 }, 'valueOf');
-	
-	/** Used to detect maps, sets, and weakmaps. */
-	var dataViewCtorString = toSource(DataView),
-	    mapCtorString = toSource(Map),
-	    promiseCtorString = toSource(Promise),
-	    setCtorString = toSource(Set),
-	    weakMapCtorString = toSource(WeakMap);
-	
-	/**
-	 * The base implementation of `getTag`.
-	 *
-	 * @private
-	 * @param {*} value The value to query.
-	 * @returns {string} Returns the `toStringTag`.
-	 */
-	function baseGetTag(value) {
-	  return objectToString.call(value);
-	}
-	
-	/**
-	 * The base implementation of `_.isNative` without bad shim checks.
-	 *
-	 * @private
-	 * @param {*} value The value to check.
-	 * @returns {boolean} Returns `true` if `value` is a native function,
-	 *  else `false`.
-	 */
-	function baseIsNative(value) {
-	  if (!isObject(value) || isMasked(value)) {
-	    return false;
-	  }
-	  var pattern = (isFunction(value) || isHostObject(value)) ? reIsNative : reIsHostCtor;
-	  return pattern.test(toSource(value));
-	}
-	
-	/**
-	 * Gets the native function at `key` of `object`.
-	 *
-	 * @private
-	 * @param {Object} object The object to query.
-	 * @param {string} key The key of the method to get.
-	 * @returns {*} Returns the function if it's native, else `undefined`.
-	 */
-	function getNative(object, key) {
-	  var value = getValue(object, key);
-	  return baseIsNative(value) ? value : undefined;
-	}
-	
-	/**
-	 * Gets the `toStringTag` of `value`.
-	 *
-	 * @private
-	 * @param {*} value The value to query.
-	 * @returns {string} Returns the `toStringTag`.
-	 */
-	var getTag = baseGetTag;
-	
-	// Fallback for data views, maps, sets, and weak maps in IE 11,
-	// for data views in Edge < 14, and promises in Node.js.
-	if ((DataView && getTag(new DataView(new ArrayBuffer(1))) != dataViewTag) ||
-	    (Map && getTag(new Map) != mapTag) ||
-	    (Promise && getTag(Promise.resolve()) != promiseTag) ||
-	    (Set && getTag(new Set) != setTag) ||
-	    (WeakMap && getTag(new WeakMap) != weakMapTag)) {
-	  getTag = function(value) {
-	    var result = objectToString.call(value),
-	        Ctor = result == objectTag ? value.constructor : undefined,
-	        ctorString = Ctor ? toSource(Ctor) : undefined;
-	
-	    if (ctorString) {
-	      switch (ctorString) {
-	        case dataViewCtorString: return dataViewTag;
-	        case mapCtorString: return mapTag;
-	        case promiseCtorString: return promiseTag;
-	        case setCtorString: return setTag;
-	        case weakMapCtorString: return weakMapTag;
-	      }
-	    }
-	    return result;
-	  };
-	}
-	
-	/**
-	 * Checks if `func` has its source masked.
-	 *
-	 * @private
-	 * @param {Function} func The function to check.
-	 * @returns {boolean} Returns `true` if `func` is masked, else `false`.
-	 */
-	function isMasked(func) {
-	  return !!maskSrcKey && (maskSrcKey in func);
-	}
-	
-	/**
-	 * Checks if `value` is likely a prototype object.
-	 *
-	 * @private
-	 * @param {*} value The value to check.
-	 * @returns {boolean} Returns `true` if `value` is a prototype, else `false`.
-	 */
-	function isPrototype(value) {
-	  var Ctor = value && value.constructor,
-	      proto = (typeof Ctor == 'function' && Ctor.prototype) || objectProto;
-	
-	  return value === proto;
-	}
-	
-	/**
-	 * Converts `func` to its source code.
-	 *
-	 * @private
-	 * @param {Function} func The function to process.
-	 * @returns {string} Returns the source code.
-	 */
-	function toSource(func) {
-	  if (func != null) {
-	    try {
-	      return funcToString.call(func);
-	    } catch (e) {}
-	    try {
-	      return (func + '');
-	    } catch (e) {}
-	  }
-	  return '';
-	}
-	
-	/**
-	 * Checks if `value` is likely an `arguments` object.
-	 *
-	 * @static
-	 * @memberOf _
-	 * @since 0.1.0
-	 * @category Lang
-	 * @param {*} value The value to check.
-	 * @returns {boolean} Returns `true` if `value` is an `arguments` object,
-	 *  else `false`.
-	 * @example
-	 *
-	 * _.isArguments(function() { return arguments; }());
-	 * // => true
-	 *
-	 * _.isArguments([1, 2, 3]);
-	 * // => false
-	 */
-	function isArguments(value) {
-	  // Safari 8.1 makes `arguments.callee` enumerable in strict mode.
-	  return isArrayLikeObject(value) && hasOwnProperty.call(value, 'callee') &&
-	    (!propertyIsEnumerable.call(value, 'callee') || objectToString.call(value) == argsTag);
-	}
-	
-	/**
-	 * Checks if `value` is classified as an `Array` object.
-	 *
-	 * @static
-	 * @memberOf _
-	 * @since 0.1.0
-	 * @category Lang
-	 * @param {*} value The value to check.
-	 * @returns {boolean} Returns `true` if `value` is an array, else `false`.
-	 * @example
-	 *
-	 * _.isArray([1, 2, 3]);
-	 * // => true
-	 *
-	 * _.isArray(document.body.children);
-	 * // => false
-	 *
-	 * _.isArray('abc');
-	 * // => false
-	 *
-	 * _.isArray(_.noop);
-	 * // => false
-	 */
-	var isArray = Array.isArray;
-	
-	/**
-	 * Checks if `value` is array-like. A value is considered array-like if it's
-	 * not a function and has a `value.length` that's an integer greater than or
-	 * equal to `0` and less than or equal to `Number.MAX_SAFE_INTEGER`.
-	 *
-	 * @static
-	 * @memberOf _
-	 * @since 4.0.0
-	 * @category Lang
-	 * @param {*} value The value to check.
-	 * @returns {boolean} Returns `true` if `value` is array-like, else `false`.
-	 * @example
-	 *
-	 * _.isArrayLike([1, 2, 3]);
-	 * // => true
-	 *
-	 * _.isArrayLike(document.body.children);
-	 * // => true
-	 *
-	 * _.isArrayLike('abc');
-	 * // => true
-	 *
-	 * _.isArrayLike(_.noop);
-	 * // => false
-	 */
-	function isArrayLike(value) {
-	  return value != null && isLength(value.length) && !isFunction(value);
-	}
-	
-	/**
-	 * This method is like `_.isArrayLike` except that it also checks if `value`
-	 * is an object.
-	 *
-	 * @static
-	 * @memberOf _
-	 * @since 4.0.0
-	 * @category Lang
-	 * @param {*} value The value to check.
-	 * @returns {boolean} Returns `true` if `value` is an array-like object,
-	 *  else `false`.
-	 * @example
-	 *
-	 * _.isArrayLikeObject([1, 2, 3]);
-	 * // => true
-	 *
-	 * _.isArrayLikeObject(document.body.children);
-	 * // => true
-	 *
-	 * _.isArrayLikeObject('abc');
-	 * // => false
-	 *
-	 * _.isArrayLikeObject(_.noop);
-	 * // => false
-	 */
-	function isArrayLikeObject(value) {
-	  return isObjectLike(value) && isArrayLike(value);
-	}
-	
-	/**
-	 * Checks if `value` is a buffer.
-	 *
-	 * @static
-	 * @memberOf _
-	 * @since 4.3.0
-	 * @category Lang
-	 * @param {*} value The value to check.
-	 * @returns {boolean} Returns `true` if `value` is a buffer, else `false`.
-	 * @example
-	 *
-	 * _.isBuffer(new Buffer(2));
-	 * // => true
-	 *
-	 * _.isBuffer(new Uint8Array(2));
-	 * // => false
-	 */
-	var isBuffer = nativeIsBuffer || stubFalse;
-	
-	/**
-	 * Checks if `value` is an empty object, collection, map, or set.
-	 *
-	 * Objects are considered empty if they have no own enumerable string keyed
-	 * properties.
-	 *
-	 * Array-like values such as `arguments` objects, arrays, buffers, strings, or
-	 * jQuery-like collections are considered empty if they have a `length` of `0`.
-	 * Similarly, maps and sets are considered empty if they have a `size` of `0`.
-	 *
-	 * @static
-	 * @memberOf _
-	 * @since 0.1.0
-	 * @category Lang
-	 * @param {*} value The value to check.
-	 * @returns {boolean} Returns `true` if `value` is empty, else `false`.
-	 * @example
-	 *
-	 * _.isEmpty(null);
-	 * // => true
-	 *
-	 * _.isEmpty(true);
-	 * // => true
-	 *
-	 * _.isEmpty(1);
-	 * // => true
-	 *
-	 * _.isEmpty([1, 2, 3]);
-	 * // => false
-	 *
-	 * _.isEmpty({ 'a': 1 });
-	 * // => false
-	 */
-	function isEmpty(value) {
-	  if (isArrayLike(value) &&
-	      (isArray(value) || typeof value == 'string' ||
-	        typeof value.splice == 'function' || isBuffer(value) || isArguments(value))) {
-	    return !value.length;
-	  }
-	  var tag = getTag(value);
-	  if (tag == mapTag || tag == setTag) {
-	    return !value.size;
-	  }
-	  if (nonEnumShadows || isPrototype(value)) {
-	    return !nativeKeys(value).length;
-	  }
-	  for (var key in value) {
-	    if (hasOwnProperty.call(value, key)) {
-	      return false;
-	    }
-	  }
-	  return true;
-	}
-	
-	/**
-	 * Checks if `value` is classified as a `Function` object.
-	 *
-	 * @static
-	 * @memberOf _
-	 * @since 0.1.0
-	 * @category Lang
-	 * @param {*} value The value to check.
-	 * @returns {boolean} Returns `true` if `value` is a function, else `false`.
-	 * @example
-	 *
-	 * _.isFunction(_);
-	 * // => true
-	 *
-	 * _.isFunction(/abc/);
-	 * // => false
-	 */
-	function isFunction(value) {
-	  // The use of `Object#toString` avoids issues with the `typeof` operator
-	  // in Safari 8-9 which returns 'object' for typed array and other constructors.
-	  var tag = isObject(value) ? objectToString.call(value) : '';
-	  return tag == funcTag || tag == genTag;
-	}
-	
-	/**
-	 * Checks if `value` is a valid array-like length.
-	 *
-	 * **Note:** This method is loosely based on
-	 * [`ToLength`](http://ecma-international.org/ecma-262/7.0/#sec-tolength).
-	 *
-	 * @static
-	 * @memberOf _
-	 * @since 4.0.0
-	 * @category Lang
-	 * @param {*} value The value to check.
-	 * @returns {boolean} Returns `true` if `value` is a valid length, else `false`.
-	 * @example
-	 *
-	 * _.isLength(3);
-	 * // => true
-	 *
-	 * _.isLength(Number.MIN_VALUE);
-	 * // => false
-	 *
-	 * _.isLength(Infinity);
-	 * // => false
-	 *
-	 * _.isLength('3');
-	 * // => false
-	 */
-	function isLength(value) {
-	  return typeof value == 'number' &&
-	    value > -1 && value % 1 == 0 && value <= MAX_SAFE_INTEGER;
-	}
-	
-	/**
-	 * Checks if `value` is the
-	 * [language type](http://www.ecma-international.org/ecma-262/7.0/#sec-ecmascript-language-types)
-	 * of `Object`. (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
-	 *
-	 * @static
-	 * @memberOf _
-	 * @since 0.1.0
-	 * @category Lang
-	 * @param {*} value The value to check.
-	 * @returns {boolean} Returns `true` if `value` is an object, else `false`.
-	 * @example
-	 *
-	 * _.isObject({});
-	 * // => true
-	 *
-	 * _.isObject([1, 2, 3]);
-	 * // => true
-	 *
-	 * _.isObject(_.noop);
-	 * // => true
-	 *
-	 * _.isObject(null);
-	 * // => false
-	 */
-	function isObject(value) {
-	  var type = typeof value;
-	  return !!value && (type == 'object' || type == 'function');
-	}
-	
-	/**
-	 * Checks if `value` is object-like. A value is object-like if it's not `null`
-	 * and has a `typeof` result of "object".
-	 *
-	 * @static
-	 * @memberOf _
-	 * @since 4.0.0
-	 * @category Lang
-	 * @param {*} value The value to check.
-	 * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
-	 * @example
-	 *
-	 * _.isObjectLike({});
-	 * // => true
-	 *
-	 * _.isObjectLike([1, 2, 3]);
-	 * // => true
-	 *
-	 * _.isObjectLike(_.noop);
-	 * // => false
-	 *
-	 * _.isObjectLike(null);
-	 * // => false
-	 */
-	function isObjectLike(value) {
-	  return !!value && typeof value == 'object';
-	}
-	
-	/**
-	 * This method returns `false`.
-	 *
-	 * @static
-	 * @memberOf _
-	 * @since 4.13.0
-	 * @category Util
-	 * @returns {boolean} Returns `false`.
-	 * @example
-	 *
-	 * _.times(2, _.stubFalse);
-	 * // => [false, false]
-	 */
-	function stubFalse() {
-	  return false;
-	}
-	
-	module.exports = isEmpty;
-	
-	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(/*! ./../webpack/buildin/module.js */ 193)(module)))
-
-/***/ },
+/* 267 */,
+/* 268 */,
 /* 269 */
 /*!*******************************************************!*\
   !*** ./client/app/components/layouts/main-layout.jsx ***!
@@ -30985,6 +30146,74 @@
 
 /***/ },
 /* 270 */
+/*!***********************************************************!*\
+  !*** ./client/app/components/layouts/messages-layout.jsx ***!
+  \***********************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _react = __webpack_require__(/*! react */ 1);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var _class = function (_React$Component) {
+	  _inherits(_class, _React$Component);
+	
+	  function _class() {
+	    _classCallCheck(this, _class);
+	
+	    return _possibleConstructorReturn(this, (_class.__proto__ || Object.getPrototypeOf(_class)).apply(this, arguments));
+	  }
+	
+	  _createClass(_class, [{
+	    key: 'render',
+	    value: function render() {
+	      return _react2.default.createElement(
+	        'div',
+	        null,
+	        _react2.default.createElement(
+	          'p',
+	          null,
+	          'JOU'
+	        )
+	      );
+	    }
+	  }]);
+	
+	  return _class;
+	}(_react2.default.Component);
+	
+	/*
+	<div className="messages">
+	  <div style="width: 500px;">
+	  <div style="float: left; width: 200px;">Left Stuff</div>
+	  <div style="float: left; width: 100px;">Middle Stuff</div>
+	  <div style="float: left; width: 200px;">Right Stuff</div>
+	  <br style="clear: left;" />
+	  </div>
+	</div>
+	*/
+
+
+	exports.default = _class;
+
+/***/ },
+/* 271 */
 /*!****************************************!*\
   !*** ./client/app/components/home.jsx ***!
   \****************************************/
@@ -31040,7 +30269,7 @@
 	exports.default = _class;
 
 /***/ },
-/* 271 */
+/* 272 */
 /*!*****************************************!*\
   !*** ./client/app/components/login.jsx ***!
   \*****************************************/
@@ -31051,6 +30280,7 @@
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
+	exports.LoginContainer = undefined;
 	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
@@ -31058,11 +30288,15 @@
 	
 	var _react2 = _interopRequireDefault(_react);
 	
-	var _reactRouterRedux = __webpack_require__(/*! react-router-redux */ 262);
-	
 	var _reactRedux = __webpack_require__(/*! react-redux */ 172);
 	
-	var _auth = __webpack_require__(/*! ../actions/auth */ 272);
+	var _auth = __webpack_require__(/*! ../actions/auth */ 273);
+	
+	var actionCreators = _interopRequireWildcard(_auth);
+	
+	var _reactRouter = __webpack_require__(/*! react-router */ 209);
+	
+	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -31072,27 +30306,21 @@
 	
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 	
-	function select(state, ownProps) {
-	  var isAuthenticated = state.user.name || false;
-	  var redirect = ownProps.location.query.redirect || '/';
-	  return {
-	    isAuthenticated: isAuthenticated,
-	    redirect: redirect
-	  };
-	}
+	var LoginForm = function (_React$Component) {
+	  _inherits(LoginForm, _React$Component);
 	
-	var LoginContainer = function (_Component) {
-	  _inherits(LoginContainer, _Component);
+	  function LoginForm(props) {
+	    _classCallCheck(this, LoginForm);
 	
-	  function LoginContainer() {
-	    _classCallCheck(this, LoginContainer);
+	    var _this = _possibleConstructorReturn(this, (LoginForm.__proto__ || Object.getPrototypeOf(LoginForm)).call(this, props));
 	
-	    return _possibleConstructorReturn(this, (LoginContainer.__proto__ || Object.getPrototypeOf(LoginContainer)).apply(this, arguments));
+	    _this.handleLogin = _this.handleLogin.bind(_this);
+	    return _this;
 	  }
 	
-	  _createClass(LoginContainer, [{
-	    key: 'onClick',
-	    value: function onClick(e) {
+	  _createClass(LoginForm, [{
+	    key: 'handleLogin',
+	    value: function handleLogin(e) {
 	      e.preventDefault();
 	      this.props.authenticate(this.refs.username.value, this.refs.password.value);
 	    }
@@ -31103,30 +30331,71 @@
 	        'div',
 	        null,
 	        _react2.default.createElement(
-	          'h2',
+	          'form',
 	          null,
-	          'Enter your credentials'
+	          _react2.default.createElement(
+	            'h3',
+	            null,
+	            ' Log in: '
+	          ),
+	          _react2.default.createElement(
+	            'ul',
+	            null,
+	            _react2.default.createElement(
+	              'span',
+	              null,
+	              'Username '
+	            ),
+	            _react2.default.createElement('input', { type: 'text',
+	              ref: 'username' })
+	          ),
+	          _react2.default.createElement(
+	            'ul',
+	            null,
+	            _react2.default.createElement(
+	              'span',
+	              null,
+	              'Password '
+	            ),
+	            _react2.default.createElement('input', { type: 'text',
+	              ref: 'password' })
+	          ),
+	          _react2.default.createElement(
+	            'button',
+	            { type: 'submit',
+	              onClick: this.handleLogin },
+	            'Log in'
+	          ),
+	          _react2.default.createElement(
+	            _reactRouter.Link,
+	            { to: '/register' },
+	            'or register as a client here'
+	          )
 	        ),
-	        _react2.default.createElement('input', { placeholder: 'username', type: 'text', ref: 'username' }),
-	        _react2.default.createElement('br', null),
-	        _react2.default.createElement('input', { placeholder: 'password', type: 'text', ref: 'password' }),
-	        _react2.default.createElement('br', null),
 	        _react2.default.createElement(
-	          'button',
-	          { onClick: this.onClick.bind(this) },
-	          'Login'
+	          'p',
+	          null,
+	          this.props.message
 	        )
 	      );
 	    }
 	  }]);
 	
-	  return LoginContainer;
-	}(_react.Component);
+	  return LoginForm;
+	}(_react2.default.Component);
 	
-	exports.default = (0, _reactRedux.connect)(select, { authenticate: _auth.authenticate, replace: _reactRouterRedux.routerActions.replace })(LoginContainer);
+	function mapStateToProps(state) {
+	  return {
+	    message: state.auth.getIn(['session', 'message']),
+	    isChecking: state.auth.getIn(['session', 'isChecking']),
+	    token: state.auth.getIn(['session', 'token'])
+	  };
+	}
+	
+	var LoginContainer = exports.LoginContainer = (0, _reactRedux.connect)(mapStateToProps, actionCreators)(LoginForm);
 
 /***/ },
-/* 272 */
+/* 273 */
 /*!************************************!*\
   !*** ./client/app/actions/auth.js ***!
   \************************************/
@@ -31142,11 +30411,13 @@
 	exports.checkToken = checkToken;
 	exports.logoutAndRedirect = logoutAndRedirect;
 	
-	var _immutable = __webpack_require__(/*! immutable */ 273);
+	var _immutable = __webpack_require__(/*! immutable */ 274);
 	
-	var _axios = __webpack_require__(/*! axios */ 274);
+	var _axios = __webpack_require__(/*! axios */ 275);
 	
 	var _axios2 = _interopRequireDefault(_axios);
+	
+	var _reactRouter = __webpack_require__(/*! react-router */ 209);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -31156,11 +30427,12 @@
 	  };
 	}
 	
-	function receiveToken(token) {
+	function receiveToken(redirect, token) {
 	  localStorage.setItem('token', token);
 	  return {
 	    type: 'AUTH_SET_TOKEN',
-	    session: token
+	    session: token,
+	    redirect: redirect
 	  };
 	}
 	
@@ -31179,7 +30451,7 @@
 	}
 	
 	function canFetch(state) {
-	  return !state.isChecking;
+	  return !state.getIn(['session', 'isChecking']);
 	}
 	
 	function sendAuthentication(username, password) {
@@ -31194,9 +30466,8 @@
 	        password: password
 	      }
 	    }).then(function (response) {
-	      dispatch(receiveToken(response.data.token));
-	      debugger;
-	      //appHistory.push('/profile');
+	      dispatch(receiveToken('/messages', response.data.token));
+	      _reactRouter.browserHistory.push('/messages');
 	    }).catch(function (error) {
 	      dispatch(receiveError('Error while locking in. Please check credentials.'));
 	    });
@@ -31221,14 +30492,14 @@
 	      dispatch(tokenOK());
 	    }).catch(function (error) {
 	      dispatch(receiveError('Please log in first!'));
-	      //appHistory.push('/login');
+	      _reactRouter.browserHistory.push('/login');
 	    });
 	  };
 	}
 	
 	function authenticate(username, password) {
 	  return function (dispatch, getState) {
-	    if (canFetch(getState().user)) {
+	    if (canFetch(getState().auth)) {
 	      return dispatch(sendAuthentication(username, password));
 	    } else {
 	      return Promise.resolve();
@@ -31239,7 +30510,7 @@
 	function checkToken(role) {
 	  return function (dispatch, getState) {
 	    var token = localStorage.getItem('token');
-	    if (canFetch(getState().loginReducer) && token !== undefined) {
+	    if (canFetch(getState().auth) && token !== undefined) {
 	      return dispatch(sendToken(token, role));
 	    } else {
 	      return Promise.resolve();
@@ -31262,7 +30533,7 @@
 	}
 
 /***/ },
-/* 273 */
+/* 274 */
 /*!***************************************!*\
   !*** ./~/immutable/dist/immutable.js ***!
   \***************************************/
@@ -36249,16 +35520,16 @@
 	}));
 
 /***/ },
-/* 274 */
+/* 275 */
 /*!**************************!*\
   !*** ./~/axios/index.js ***!
   \**************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = __webpack_require__(/*! ./lib/axios */ 275);
+	module.exports = __webpack_require__(/*! ./lib/axios */ 276);
 
 /***/ },
-/* 275 */
+/* 276 */
 /*!******************************!*\
   !*** ./~/axios/lib/axios.js ***!
   \******************************/
@@ -36266,9 +35537,9 @@
 
 	'use strict';
 	
-	var utils = __webpack_require__(/*! ./utils */ 276);
-	var bind = __webpack_require__(/*! ./helpers/bind */ 277);
-	var Axios = __webpack_require__(/*! ./core/Axios */ 278);
+	var utils = __webpack_require__(/*! ./utils */ 277);
+	var bind = __webpack_require__(/*! ./helpers/bind */ 278);
+	var Axios = __webpack_require__(/*! ./core/Axios */ 279);
 	
 	/**
 	 * Create an instance of Axios
@@ -36301,15 +35572,15 @@
 	};
 	
 	// Expose Cancel & CancelToken
-	axios.Cancel = __webpack_require__(/*! ./cancel/Cancel */ 296);
-	axios.CancelToken = __webpack_require__(/*! ./cancel/CancelToken */ 297);
-	axios.isCancel = __webpack_require__(/*! ./cancel/isCancel */ 293);
+	axios.Cancel = __webpack_require__(/*! ./cancel/Cancel */ 297);
+	axios.CancelToken = __webpack_require__(/*! ./cancel/CancelToken */ 298);
+	axios.isCancel = __webpack_require__(/*! ./cancel/isCancel */ 294);
 	
 	// Expose all/spread
 	axios.all = function all(promises) {
 	  return Promise.all(promises);
 	};
-	axios.spread = __webpack_require__(/*! ./helpers/spread */ 298);
+	axios.spread = __webpack_require__(/*! ./helpers/spread */ 299);
 	
 	module.exports = axios;
 	
@@ -36318,7 +35589,7 @@
 
 
 /***/ },
-/* 276 */
+/* 277 */
 /*!******************************!*\
   !*** ./~/axios/lib/utils.js ***!
   \******************************/
@@ -36326,7 +35597,7 @@
 
 	'use strict';
 	
-	var bind = __webpack_require__(/*! ./helpers/bind */ 277);
+	var bind = __webpack_require__(/*! ./helpers/bind */ 278);
 	
 	/*global toString:true*/
 	
@@ -36626,7 +35897,7 @@
 
 
 /***/ },
-/* 277 */
+/* 278 */
 /*!*************************************!*\
   !*** ./~/axios/lib/helpers/bind.js ***!
   \*************************************/
@@ -36646,7 +35917,7 @@
 
 
 /***/ },
-/* 278 */
+/* 279 */
 /*!***********************************!*\
   !*** ./~/axios/lib/core/Axios.js ***!
   \***********************************/
@@ -36654,12 +35925,12 @@
 
 	'use strict';
 	
-	var defaults = __webpack_require__(/*! ./../defaults */ 279);
-	var utils = __webpack_require__(/*! ./../utils */ 276);
-	var InterceptorManager = __webpack_require__(/*! ./InterceptorManager */ 290);
-	var dispatchRequest = __webpack_require__(/*! ./dispatchRequest */ 291);
-	var isAbsoluteURL = __webpack_require__(/*! ./../helpers/isAbsoluteURL */ 294);
-	var combineURLs = __webpack_require__(/*! ./../helpers/combineURLs */ 295);
+	var defaults = __webpack_require__(/*! ./../defaults */ 280);
+	var utils = __webpack_require__(/*! ./../utils */ 277);
+	var InterceptorManager = __webpack_require__(/*! ./InterceptorManager */ 291);
+	var dispatchRequest = __webpack_require__(/*! ./dispatchRequest */ 292);
+	var isAbsoluteURL = __webpack_require__(/*! ./../helpers/isAbsoluteURL */ 295);
+	var combineURLs = __webpack_require__(/*! ./../helpers/combineURLs */ 296);
 	
 	/**
 	 * Create a new instance of Axios
@@ -36740,7 +36011,7 @@
 
 
 /***/ },
-/* 279 */
+/* 280 */
 /*!*********************************!*\
   !*** ./~/axios/lib/defaults.js ***!
   \*********************************/
@@ -36748,8 +36019,8 @@
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
 	
-	var utils = __webpack_require__(/*! ./utils */ 276);
-	var normalizeHeaderName = __webpack_require__(/*! ./helpers/normalizeHeaderName */ 280);
+	var utils = __webpack_require__(/*! ./utils */ 277);
+	var normalizeHeaderName = __webpack_require__(/*! ./helpers/normalizeHeaderName */ 281);
 	
 	var PROTECTION_PREFIX = /^\)\]\}',?\n/;
 	var DEFAULT_CONTENT_TYPE = {
@@ -36766,10 +36037,10 @@
 	  var adapter;
 	  if (typeof XMLHttpRequest !== 'undefined') {
 	    // For browsers use XHR adapter
-	    adapter = __webpack_require__(/*! ./adapters/xhr */ 281);
+	    adapter = __webpack_require__(/*! ./adapters/xhr */ 282);
 	  } else if (typeof process !== 'undefined') {
 	    // For node use HTTP adapter
-	    adapter = __webpack_require__(/*! ./adapters/http */ 281);
+	    adapter = __webpack_require__(/*! ./adapters/http */ 282);
 	  }
 	  return adapter;
 	}
@@ -36836,7 +36107,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./~/process/browser.js */ 3)))
 
 /***/ },
-/* 280 */
+/* 281 */
 /*!****************************************************!*\
   !*** ./~/axios/lib/helpers/normalizeHeaderName.js ***!
   \****************************************************/
@@ -36844,7 +36115,7 @@
 
 	'use strict';
 	
-	var utils = __webpack_require__(/*! ../utils */ 276);
+	var utils = __webpack_require__(/*! ../utils */ 277);
 	
 	module.exports = function normalizeHeaderName(headers, normalizedName) {
 	  utils.forEach(headers, function processHeader(value, name) {
@@ -36857,7 +36128,7 @@
 
 
 /***/ },
-/* 281 */
+/* 282 */
 /*!*************************************!*\
   !*** ./~/axios/lib/adapters/xhr.js ***!
   \*************************************/
@@ -36865,13 +36136,13 @@
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
 	
-	var utils = __webpack_require__(/*! ./../utils */ 276);
-	var settle = __webpack_require__(/*! ./../core/settle */ 282);
-	var buildURL = __webpack_require__(/*! ./../helpers/buildURL */ 285);
-	var parseHeaders = __webpack_require__(/*! ./../helpers/parseHeaders */ 286);
-	var isURLSameOrigin = __webpack_require__(/*! ./../helpers/isURLSameOrigin */ 287);
-	var createError = __webpack_require__(/*! ../core/createError */ 283);
-	var btoa = (typeof window !== 'undefined' && window.btoa) || __webpack_require__(/*! ./../helpers/btoa */ 288);
+	var utils = __webpack_require__(/*! ./../utils */ 277);
+	var settle = __webpack_require__(/*! ./../core/settle */ 283);
+	var buildURL = __webpack_require__(/*! ./../helpers/buildURL */ 286);
+	var parseHeaders = __webpack_require__(/*! ./../helpers/parseHeaders */ 287);
+	var isURLSameOrigin = __webpack_require__(/*! ./../helpers/isURLSameOrigin */ 288);
+	var createError = __webpack_require__(/*! ../core/createError */ 284);
+	var btoa = (typeof window !== 'undefined' && window.btoa) || __webpack_require__(/*! ./../helpers/btoa */ 289);
 	
 	module.exports = function xhrAdapter(config) {
 	  return new Promise(function dispatchXhrRequest(resolve, reject) {
@@ -36967,7 +36238,7 @@
 	    // This is only done if running in a standard browser environment.
 	    // Specifically not if we're in a web worker, or react-native.
 	    if (utils.isStandardBrowserEnv()) {
-	      var cookies = __webpack_require__(/*! ./../helpers/cookies */ 289);
+	      var cookies = __webpack_require__(/*! ./../helpers/cookies */ 290);
 	
 	      // Add xsrf header
 	      var xsrfValue = (config.withCredentials || isURLSameOrigin(config.url)) && config.xsrfCookieName ?
@@ -37044,7 +36315,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./~/process/browser.js */ 3)))
 
 /***/ },
-/* 282 */
+/* 283 */
 /*!************************************!*\
   !*** ./~/axios/lib/core/settle.js ***!
   \************************************/
@@ -37052,7 +36323,7 @@
 
 	'use strict';
 	
-	var createError = __webpack_require__(/*! ./createError */ 283);
+	var createError = __webpack_require__(/*! ./createError */ 284);
 	
 	/**
 	 * Resolve or reject a Promise based on response status.
@@ -37078,7 +36349,7 @@
 
 
 /***/ },
-/* 283 */
+/* 284 */
 /*!*****************************************!*\
   !*** ./~/axios/lib/core/createError.js ***!
   \*****************************************/
@@ -37086,7 +36357,7 @@
 
 	'use strict';
 	
-	var enhanceError = __webpack_require__(/*! ./enhanceError */ 284);
+	var enhanceError = __webpack_require__(/*! ./enhanceError */ 285);
 	
 	/**
 	 * Create an Error with the specified message, config, error code, and response.
@@ -37104,7 +36375,7 @@
 
 
 /***/ },
-/* 284 */
+/* 285 */
 /*!******************************************!*\
   !*** ./~/axios/lib/core/enhanceError.js ***!
   \******************************************/
@@ -37132,7 +36403,7 @@
 
 
 /***/ },
-/* 285 */
+/* 286 */
 /*!*****************************************!*\
   !*** ./~/axios/lib/helpers/buildURL.js ***!
   \*****************************************/
@@ -37140,7 +36411,7 @@
 
 	'use strict';
 	
-	var utils = __webpack_require__(/*! ./../utils */ 276);
+	var utils = __webpack_require__(/*! ./../utils */ 277);
 	
 	function encode(val) {
 	  return encodeURIComponent(val).
@@ -37209,7 +36480,7 @@
 
 
 /***/ },
-/* 286 */
+/* 287 */
 /*!*********************************************!*\
   !*** ./~/axios/lib/helpers/parseHeaders.js ***!
   \*********************************************/
@@ -37217,7 +36488,7 @@
 
 	'use strict';
 	
-	var utils = __webpack_require__(/*! ./../utils */ 276);
+	var utils = __webpack_require__(/*! ./../utils */ 277);
 	
 	/**
 	 * Parse headers into an object
@@ -37255,7 +36526,7 @@
 
 
 /***/ },
-/* 287 */
+/* 288 */
 /*!************************************************!*\
   !*** ./~/axios/lib/helpers/isURLSameOrigin.js ***!
   \************************************************/
@@ -37263,7 +36534,7 @@
 
 	'use strict';
 	
-	var utils = __webpack_require__(/*! ./../utils */ 276);
+	var utils = __webpack_require__(/*! ./../utils */ 277);
 	
 	module.exports = (
 	  utils.isStandardBrowserEnv() ?
@@ -37332,7 +36603,7 @@
 
 
 /***/ },
-/* 288 */
+/* 289 */
 /*!*************************************!*\
   !*** ./~/axios/lib/helpers/btoa.js ***!
   \*************************************/
@@ -37377,7 +36648,7 @@
 
 
 /***/ },
-/* 289 */
+/* 290 */
 /*!****************************************!*\
   !*** ./~/axios/lib/helpers/cookies.js ***!
   \****************************************/
@@ -37385,7 +36656,7 @@
 
 	'use strict';
 	
-	var utils = __webpack_require__(/*! ./../utils */ 276);
+	var utils = __webpack_require__(/*! ./../utils */ 277);
 	
 	module.exports = (
 	  utils.isStandardBrowserEnv() ?
@@ -37439,7 +36710,7 @@
 
 
 /***/ },
-/* 290 */
+/* 291 */
 /*!************************************************!*\
   !*** ./~/axios/lib/core/InterceptorManager.js ***!
   \************************************************/
@@ -37447,7 +36718,7 @@
 
 	'use strict';
 	
-	var utils = __webpack_require__(/*! ./../utils */ 276);
+	var utils = __webpack_require__(/*! ./../utils */ 277);
 	
 	function InterceptorManager() {
 	  this.handlers = [];
@@ -37500,7 +36771,7 @@
 
 
 /***/ },
-/* 291 */
+/* 292 */
 /*!*********************************************!*\
   !*** ./~/axios/lib/core/dispatchRequest.js ***!
   \*********************************************/
@@ -37508,10 +36779,10 @@
 
 	'use strict';
 	
-	var utils = __webpack_require__(/*! ./../utils */ 276);
-	var transformData = __webpack_require__(/*! ./transformData */ 292);
-	var isCancel = __webpack_require__(/*! ../cancel/isCancel */ 293);
-	var defaults = __webpack_require__(/*! ../defaults */ 279);
+	var utils = __webpack_require__(/*! ./../utils */ 277);
+	var transformData = __webpack_require__(/*! ./transformData */ 293);
+	var isCancel = __webpack_require__(/*! ../cancel/isCancel */ 294);
+	var defaults = __webpack_require__(/*! ../defaults */ 280);
 	
 	/**
 	 * Throws a `Cancel` if cancellation has been requested.
@@ -37588,7 +36859,7 @@
 
 
 /***/ },
-/* 292 */
+/* 293 */
 /*!*******************************************!*\
   !*** ./~/axios/lib/core/transformData.js ***!
   \*******************************************/
@@ -37596,7 +36867,7 @@
 
 	'use strict';
 	
-	var utils = __webpack_require__(/*! ./../utils */ 276);
+	var utils = __webpack_require__(/*! ./../utils */ 277);
 	
 	/**
 	 * Transform the data for a request or a response
@@ -37617,7 +36888,7 @@
 
 
 /***/ },
-/* 293 */
+/* 294 */
 /*!****************************************!*\
   !*** ./~/axios/lib/cancel/isCancel.js ***!
   \****************************************/
@@ -37631,7 +36902,7 @@
 
 
 /***/ },
-/* 294 */
+/* 295 */
 /*!**********************************************!*\
   !*** ./~/axios/lib/helpers/isAbsoluteURL.js ***!
   \**********************************************/
@@ -37654,7 +36925,7 @@
 
 
 /***/ },
-/* 295 */
+/* 296 */
 /*!********************************************!*\
   !*** ./~/axios/lib/helpers/combineURLs.js ***!
   \********************************************/
@@ -37675,7 +36946,7 @@
 
 
 /***/ },
-/* 296 */
+/* 297 */
 /*!**************************************!*\
   !*** ./~/axios/lib/cancel/Cancel.js ***!
   \**************************************/
@@ -37703,7 +36974,7 @@
 
 
 /***/ },
-/* 297 */
+/* 298 */
 /*!*******************************************!*\
   !*** ./~/axios/lib/cancel/CancelToken.js ***!
   \*******************************************/
@@ -37711,7 +36982,7 @@
 
 	'use strict';
 	
-	var Cancel = __webpack_require__(/*! ./Cancel */ 296);
+	var Cancel = __webpack_require__(/*! ./Cancel */ 297);
 	
 	/**
 	 * A `CancelToken` is an object that can be used to request cancellation of an operation.
@@ -37769,7 +37040,7 @@
 
 
 /***/ },
-/* 298 */
+/* 299 */
 /*!***************************************!*\
   !*** ./~/axios/lib/helpers/spread.js ***!
   \***************************************/
@@ -37805,62 +37076,7 @@
 
 
 /***/ },
-/* 299 */
-/*!********************************************!*\
-  !*** ./client/app/reducers/userReducer.js ***!
-  \********************************************/
-/***/ function(module, exports) {
-
-	"use strict";
-	
-	var userReducer = function userReducer() {
-	  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-	  var _ref = arguments[1];
-	  var type = _ref.type,
-	      payload = _ref.payload;
-	
-	  if (type === "USER_LOGGED_IN") {
-	    return payload;
-	  }
-	  if (type === "USER_LOGGED_OUT") {
-	    return {};
-	  }
-	  return state;
-	};
-	
-	module.exports = userReducer;
-
-/***/ },
 /* 300 */
-/*!**************************************!*\
-  !*** ./client/app/reducers/index.js ***!
-  \**************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	
-	var _redux = __webpack_require__(/*! redux */ 179);
-	
-	var _authReducer = __webpack_require__(/*! ./auth-reducer.js */ 301);
-	
-	var _authReducer2 = _interopRequireDefault(_authReducer);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	// Combine Reducers
-	var reducers = (0, _redux.combineReducers)({
-	    authState: _authReducer2.default
-	});
-	
-	// Reducers
-	exports.default = reducers;
-
-/***/ },
-/* 301 */
 /*!*********************************************!*\
   !*** ./client/app/reducers/auth-reducer.js ***!
   \*********************************************/
@@ -37868,55 +37084,128 @@
 
 	'use strict';
 	
-	var _require = __webpack_require__(/*! ../constants */ 302),
-	    AUTH_SET_TOKEN = _require.AUTH_SET_TOKEN,
-	    AUTH_DISCARD_TOKEN = _require.AUTH_DISCARD_TOKEN,
-	    AUTH_SET_USER = _require.AUTH_SET_USER;
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
 	
-	function auth() {
-	  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+	exports.default = function () {
+	  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initial();
 	  var action = arguments[1];
 	
 	  switch (action.type) {
-	    // saves the token into the state
-	    case AUTH_SET_TOKEN:
-	      return {
-	        user: action.user,
-	        token: action.token
-	      };
-	    // discards the current token (logout)
-	    case AUTH_DISCARD_TOKEN:
-	      return {};
-	    // saves the current user
-	    case AUTH_SET_USER:
-	      return {
-	        user: action.user,
-	        token: action.token
-	      };
-	    // as always, on default do nothing
-	    default:
-	      return state;
+	    case 'REQUEST':
+	      return setFetchingFlag(state);
+	    case 'AUTH_SET_TOKEN':
+	      return setToken(state, action.session, action.redirect);
+	    case 'RECEIVE_AUTH_ERROR':
+	      return setError(state, action.error);
+	    case 'TOKEN_OK':
+	      return setAuthenticated(state);
+	    case 'LOGOUT':
+	      return logOut(state);
 	  }
+	  return state;
+	};
+	
+	var _immutable = __webpack_require__(/*! immutable */ 274);
+	
+	function initial() {
+	  return (0, _immutable.Map)({
+	    session: (0, _immutable.Map)({
+	      message: '',
+	      isAuthenticated: false,
+	      isChecking: false,
+	      token: null
+	    })
+	  });
 	}
 	
-	module.exports = auth;
+	function setFetchingFlag(state) {
+	  return state.setIn(['session', 'isChecking'], true);
+	}
+	
+	function setAuthenticated(state) {
+	  return state.setIn(['session', 'isAuthenticated'], true);
+	}
+	
+	function setToken(state, session, redirect) {
+	  var replaceAdded = state.setIn(['session', 'redirect'], redirect);
+	  return setAuthenticated(replaceAdded.setIn(['session', 'isChecking'], false));
+	}
+	
+	function setError(state, message) {
+	  var newState = state.setIn(['session', 'message'], message);
+	  var notAuthenticated = newState.setIn(['session', 'isAuthenticated'], false);
+	  return notAuthenticated.setIn(['session', 'isChecking'], false);
+	}
+	
+	function logOut(state) {
+	  var noToken = state.setIn(['session', 'token'], null);
+	  return noToken.setIn(['session', 'isAuthenticated'], false);
+	}
 
 /***/ },
-/* 302 */
-/*!*********************************!*\
-  !*** ./client/app/constants.js ***!
-  \*********************************/
-/***/ function(module, exports) {
+/* 301 */
+/*!**********************************************************!*\
+  !*** ./client/app/components/AuthenticatedComponent.jsx ***!
+  \**********************************************************/
+/***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
-	module.exports = {
-	   AUTH_SET_TOKEN: 'auth/SET_TOKEN',
-	   AUTH_DISCARD_TOKEN: 'auth/DISCARD_TOKEN',
-	   AUTH_SET_USER: 'auth/SET_USER',
-	   USER_LOGGED_IN: 'user/LOGGED_IN',
-	   USER_LOGGED_OUT: 'user/LOGGED_OUT'
-	};
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.requireAuthentication = requireAuthentication;
+	
+	var _react = __webpack_require__(/*! react */ 1);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactRedux = __webpack_require__(/*! react-redux */ 172);
+	
+	var _auth = __webpack_require__(/*! ../actions/auth */ 273);
+	
+	var actionCreators = _interopRequireWildcard(_auth);
+	
+	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function requireAuthentication(Component) {
+	  var AuthenticatedComponent = _react2.default.createClass({
+	    displayName: 'AuthenticatedComponent',
+	
+	    componentWillMount: function componentWillMount() {
+	      this.checkAuth();
+	    },
+	    componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
+	      this.checkAuth();
+	    },
+	    checkAuth: function checkAuth() {
+	      if (!this.props.isAuthenticated) {
+	        this.props.checkToken();
+	      }
+	    },
+	    render: function render() {
+	      return _react2.default.createElement(
+	        'div',
+	        null,
+	        this.props.isAuthenticated === true ? _react2.default.createElement(Component, this.props) : null
+	      );
+	    }
+	  });
+	
+	  var mapStateToProps = function mapStateToProps(state) {
+	    return {
+	      token: state.auth.getIn(['session', 'token']),
+	      isAuthenticated: state.auth.getIn(['session', 'isAuthenticated']),
+	      username: state.auth.getIn(['session', 'username'])
+	    };
+	  };
+	
+	  return (0, _reactRedux.connect)(mapStateToProps, actionCreators)(AuthenticatedComponent);
+	}
 
 /***/ }
 /******/ ]);
