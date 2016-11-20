@@ -15,13 +15,13 @@ function setFetchingFlag(state) {
   return state.setIn(['session', 'isChecking'], true);
 }
 
-function setAuthenticated(state) {
-  return state.setIn(['session', 'isAuthenticated'], true);
+function setAuthenticated(state, username) {
+  const usernameAdded = state.setIn(['session', 'username'], username);
+  return usernameAdded.setIn(['session', 'isAuthenticated'], true);
 }
 
-function setToken(state, session, redirect) {
-  const replaceAdded = state.setIn(['session', 'redirect'], redirect);
-  return setAuthenticated(replaceAdded.setIn(['session', 'isChecking'], false));
+function setToken(state, session, username) {
+  return setAuthenticated(state.setIn(['session', 'isChecking'], false), username);
 }
 
 function setError(state, message) {
@@ -40,11 +40,11 @@ export default function(state = initial(), action) {
   case 'REQUEST':
     return setFetchingFlag(state);
   case 'AUTH_SET_TOKEN':
-    return setToken(state, action.session, action.redirect);
+    return setToken(state, action.session, action.username);
   case 'RECEIVE_AUTH_ERROR':
     return setError(state, action.error);
   case 'TOKEN_OK':
-    return setAuthenticated(state);
+    return setAuthenticated(state, action.username);
   case 'LOGOUT':
     return logOut(state);
   }

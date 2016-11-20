@@ -30186,6 +30186,7 @@
 	      return _react2.default.createElement(
 	        'div',
 	        { id: 'messages' },
+	        _react2.default.createElement('p', null),
 	        _react2.default.createElement(
 	          'div',
 	          { id: 'left' },
@@ -30430,12 +30431,12 @@
 	  };
 	}
 	
-	function receiveToken(redirect, token) {
+	function receiveToken(redirect, token, username) {
 	  localStorage.setItem('token', token);
 	  return {
 	    type: 'AUTH_SET_TOKEN',
 	    session: token,
-	    redirect: redirect
+	    username: username
 	  };
 	}
 	
@@ -30447,9 +30448,10 @@
 	  };
 	}
 	
-	function tokenOK() {
+	function tokenOK(username) {
 	  return {
-	    type: 'TOKEN_OK'
+	    type: 'TOKEN_OK',
+	    username: username
 	  };
 	}
 	
@@ -30469,7 +30471,7 @@
 	        password: password
 	      }
 	    }).then(function (response) {
-	      dispatch(receiveToken('/messages', response.data.token));
+	      dispatch(receiveToken('/messages', response.data.token, username));
 	      _reactRouter.browserHistory.push('/messages');
 	    }).catch(function (error) {
 	      dispatch(receiveError('Error while locking in. Please check credentials.'));
@@ -30491,7 +30493,7 @@
 	        'Authorization': token
 	      }
 	    }).then(function (response) {
-	      dispatch(tokenOK());
+	      dispatch(tokenOK(response.data.username));
 	    }).catch(function (error) {
 	      dispatch(receiveError('Please log in first!'));
 	      _reactRouter.browserHistory.push('/login');
@@ -37098,11 +37100,11 @@
 	    case 'REQUEST':
 	      return setFetchingFlag(state);
 	    case 'AUTH_SET_TOKEN':
-	      return setToken(state, action.session, action.redirect);
+	      return setToken(state, action.session, action.username);
 	    case 'RECEIVE_AUTH_ERROR':
 	      return setError(state, action.error);
 	    case 'TOKEN_OK':
-	      return setAuthenticated(state);
+	      return setAuthenticated(state, action.username);
 	    case 'LOGOUT':
 	      return logOut(state);
 	  }
@@ -37126,13 +37128,13 @@
 	  return state.setIn(['session', 'isChecking'], true);
 	}
 	
-	function setAuthenticated(state) {
-	  return state.setIn(['session', 'isAuthenticated'], true);
+	function setAuthenticated(state, username) {
+	  var usernameAdded = state.setIn(['session', 'username'], username);
+	  return usernameAdded.setIn(['session', 'isAuthenticated'], true);
 	}
 	
-	function setToken(state, session, redirect) {
-	  var replaceAdded = state.setIn(['session', 'redirect'], redirect);
-	  return setAuthenticated(replaceAdded.setIn(['session', 'isChecking'], false));
+	function setToken(state, session, username) {
+	  return setAuthenticated(state.setIn(['session', 'isChecking'], false), username);
 	}
 	
 	function setError(state, message) {
@@ -37231,9 +37233,9 @@
 	
 	var _reactRedux = __webpack_require__(/*! react-redux */ 172);
 	
-	var _auth = __webpack_require__(/*! ../actions/auth */ 271);
+	var _channels = __webpack_require__(/*! ../actions/channels */ 301);
 	
-	var actionCreators = _interopRequireWildcard(_auth);
+	var actionCreators = _interopRequireWildcard(_channels);
 	
 	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 	
@@ -37314,7 +37316,8 @@
 	        _react2.default.createElement(
 	          'h2',
 	          null,
-	          'Channels'
+	          this.props.username,
+	          ' s Channels'
 	        ),
 	        _react2.default.createElement(
 	          'ul',
@@ -37336,11 +37339,34 @@
 	
 	function mapStateToProps(state) {
 	  return {
-	    joku: state
+	    username: state.auth.getIn(["session", "username"])
 	  };
 	}
 	
 	var Channels = exports.Channels = (0, _reactRedux.connect)(mapStateToProps, actionCreators)(ChannelForm);
+
+/***/ },
+/* 301 */
+/*!****************************************!*\
+  !*** ./client/app/actions/channels.js ***!
+  \****************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var _immutable = __webpack_require__(/*! immutable */ 272);
+	
+	var _axios = __webpack_require__(/*! axios */ 273);
+	
+	var _axios2 = _interopRequireDefault(_axios);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function request() {
+	  return {
+	    type: 'CHANNEL-REQUEST'
+	  };
+	}
 
 /***/ }
 /******/ ]);

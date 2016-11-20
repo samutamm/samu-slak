@@ -8,12 +8,12 @@ function request() {
   };
 }
 
-export function receiveToken(redirect, token) {
+export function receiveToken(redirect, token, username) {
   localStorage.setItem('token', token);
   return {
     type: 'AUTH_SET_TOKEN',
     session: token,
-    redirect: redirect
+    username: username
   };
 }
 
@@ -25,9 +25,10 @@ function receiveError(message) {
   };
 }
 
-function tokenOK() {
+function tokenOK(username) {
   return {
-    type: 'TOKEN_OK'
+    type: 'TOKEN_OK',
+    username: username
   };
 }
 
@@ -47,7 +48,7 @@ function sendAuthentication(username, password) {
         password: password
       }
     }).then(function (response) {
-      dispatch(receiveToken('/messages', response.data.token));
+      dispatch(receiveToken('/messages', response.data.token,  username));
       browserHistory.push('/messages');
     }).catch(function (error) {
       dispatch(receiveError('Error while locking in. Please check credentials.'));
@@ -69,7 +70,7 @@ function sendToken(token, role) {
         'Authorization': token
       }
     }).then(function (response) {
-      dispatch(tokenOK());
+      dispatch(tokenOK(response.data.username));
     }).catch(function (error) {
       dispatch(receiveError('Please log in first!'));
       browserHistory.push('/login')

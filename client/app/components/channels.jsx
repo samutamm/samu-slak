@@ -1,6 +1,6 @@
 import React from 'react';
 import {connect} from 'react-redux';
-import * as actionCreators from '../actions/auth';
+import * as actionCreators from '../actions/channels';
 
 class ChannelRow extends React.Component {
   constructor(props) {
@@ -40,7 +40,7 @@ class ChannelForm extends React.Component{
     const channelList = ["uno", "dos", "tres"];
     return (
       <div>
-        <h2>Channels</h2>
+        <h2>{this.props.username} s Channels</h2>
         <ul>{channelList.map((channel, i) =>
           <ChannelRow key={i}
                       index={i}
@@ -55,7 +55,7 @@ class ChannelForm extends React.Component{
 
 function mapStateToProps(state) {
   return {
-    joku: state
+    username: state.auth.getIn(["session","username"])
   };
 }
 

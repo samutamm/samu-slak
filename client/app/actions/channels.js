@@ -3,6 +3,6 @@ import axios from 'axios';
 
 function request() {
   return {
-    type: 'REQUEST'
+    type: 'CHANNEL-REQUEST'
   };
 }
