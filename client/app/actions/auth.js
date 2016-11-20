@@ -63,15 +63,15 @@ function sendToken(token, role) {
     dispatch(request());
     axios.get('/checkToken', {
       url: "/checkToken",
-      baseURL: "",
+      baseURL: "http://localhost:3030",
       method: 'get',
-      auth: {
-        username: token,
-        password: role
+      headers: {
+        'Authorization': token
       }
     }).then(function (response) {
       dispatch(tokenOK());
     }).catch(function (error) {
+      debugger;
       dispatch(receiveError('Please log in first!'));
       browserHistory.push('/login')
     });
@@ -91,7 +91,7 @@ export function authenticate(username, password) {
 export function checkToken(role) {
   return (dispatch, getState) => {
     let token = localStorage.getItem('token');
-    if (canFetch(getState().auth) && token !== undefined) {
+    if (canFetch(getState().auth) && token !== undefined && token !== null) {
       return dispatch(sendToken(token, role))
     } else {
       return Promise.resolve()
