@@ -1,38 +1,30 @@
-/****************************************
-  Layout
-*****************************************/
 
-/**
- * Main Layout
- */
-
-.app {
-  display: flex;
-  min-width: 200px;
-  align-items: center;
-  justify-content: center;
-}
-
-.primary-aside {
-  width: 12rem;
-}
-
-.primary-aside ul {
-  list-style: none;
+body{
   margin: 0;
 }
 
-.primary-aside a {
-  display: block;
-  padding: 0.6em;
+.selected {
+  font-weight: bold;
 }
 
-.primary-aside a.active {
-  color: #fff;
-  background-color: #2297D1;
+#messages {
+  height: auto;
+}
+#left{
+  width: 33.33%;
+  width: calc(100% / 3);
+  display: inline-block;
 }
 
-main {
-  flex: 1;
-  margin-left: 2em;
+#center{
+  width: 33.33%;
+  width: calc(100% / 3);
+  display: inline-block;
+  background-color: blue;
+}
+#right{
+  width: 33.33%;
+  width: calc(100% / 3);
+  display: inline-block;
+  background-color: green;
 }

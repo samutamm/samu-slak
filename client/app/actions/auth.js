@@ -71,7 +71,6 @@ function sendToken(token, role) {
     }).then(function (response) {
       dispatch(tokenOK());
     }).catch(function (error) {
-      debugger;
       dispatch(receiveError('Please log in first!'));
       browserHistory.push('/login')
     });
@@ -91,7 +90,7 @@ export function authenticate(username, password) {
 export function checkToken(role) {
   return (dispatch, getState) => {
     let token = localStorage.getItem('token');
-    if (canFetch(getState().auth) && token !== undefined && token !== null) {
+    if (canFetch(getState().auth) && token !== undefined) {
       return dispatch(sendToken(token, role))
     } else {
       return Promise.resolve()

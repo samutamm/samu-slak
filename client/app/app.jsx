@@ -41,8 +41,8 @@ render(
       <Route component={MainLayout}>
         <Route path="/" component={requireAuthentication(Home)} />
         <Route path="/login" component={LoginContainer} />
-        <Route path="/messages" component={requireAuthentication(MessagesLayout)} />
       </Route>
+      <Route path="/messages" component={requireAuthentication(MessagesLayout)} />
     </Router>
   </Provider>,
   document.getElementById('app')
