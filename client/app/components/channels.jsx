@@ -27,9 +27,11 @@ class ChannelForm extends React.Component{
   constructor(props) {
     super(props);
     this.state = {
-      selectedChannel: null
+      selectedChannel: null,
+      channels: []
     };
     this.changeChannel = this.changeChannel.bind(this);
+    this.props.fetchChannels();
   }
   changeChannel(newChannel) {
     this.setState({
@@ -37,7 +39,12 @@ class ChannelForm extends React.Component{
     });
   }
   render() {
-    const channelList = ["uno", "dos", "tres"];
+    const channelList = this.props.channels;
+    if (channelList === undefined || channelList.length === 0) {
+      return(
+        <div><p>Fetching</p></div>
+      );
+    }
     return (
       <div>
         <h2>{this.props.username} s Channels</h2>
@@ -55,7 +62,8 @@ class ChannelForm extends React.Component{
 
 function mapStateToProps(state) {
   return {
-    username: state.auth.getIn(["session","username"])
+    username: state.auth.getIn(["session","username"]),
+    channels: state.channels.getIn(['channels'])
   };
 }
 
