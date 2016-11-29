@@ -10,8 +10,10 @@ export default class extends React.Component {
         <div id="left">
           <Channels />
         </div>
-        <div id="center">text</div>
-        <div id="right">text</div>
+        <div id="center">
+          
+        </div>
+        <div id="right"></div>
       </div>
     );
   }

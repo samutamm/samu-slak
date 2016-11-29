@@ -2,6 +2,7 @@ import React from 'react';
 import {connect} from 'react-redux';
 import * as actionCreators from '../actions/channels';
 
+
 class ChannelRow extends React.Component {
   constructor(props) {
     super(props);
@@ -9,16 +10,104 @@ class ChannelRow extends React.Component {
   }
   handleClick(e) {
     e.preventDefault();
-    if (this.props.index !== this.props.selected) {
-      this.props.changeChannel(this.props.index);
-    }
+    this.props.chooseChannel(this.props.channel);
   }
   render() {
-    var rowClass = (this.props.index === this.props.selected) ? "selected" : "not-selected";
-    return(
-      <li className={rowClass} key={this.props.index} onClick={this.handleClick}>
+    var name = this.props.channel.stocked ?
+      this.props.channel :
+      <span style={{color: 'red'}}>
         {this.props.channel}
-      </li>
+      </span>;
+    return (
+      <tr>
+        <td onClick={this.handleClick}>{name}</td>
+      </tr>
+    );
+  }
+}
+
+class ChannelTable extends React.Component {
+  render() {
+    var rows = [];
+    this.props.channels.forEach((channel) => {
+      if (channel.indexOf(this.props.filterText) === -1) {
+        return;
+      }
+      rows.push(<ChannelRow channel={channel}
+                            key={channel}
+                            chooseChannel={this.props.chooseChannel} />);
+    });
+    const tableName = this.props.tableName;
+    return (
+      <table>
+        <thead>
+          <tr>
+            <th>{tableName}</th>
+          </tr>
+        </thead>
+        <tbody>{rows}</tbody>
+      </table>
+    );
+  }
+}
+
+class SearchBar extends React.Component {
+  constructor(props) {
+    super(props);
+    this.handleChange = this.handleChange.bind(this);
+  }
+
+  handleChange() {
+    this.props.onUserInput(
+      this.filterTextInput.value
+    );
+  }
+
+  render() {
+    return (
+      <form>
+        <input
+          type="text"
+          placeholder="Search..."
+          value={this.props.filterText}
+          ref={(input) => this.filterTextInput = input}
+          onChange={this.handleChange}
+        />
+      </form>
+    );
+  }
+}
+
+class FilterableChannelTable extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      filterText: ''
+    };
+
+    this.handleUserInput = this.handleUserInput.bind(this);
+  }
+
+  handleUserInput(filterText) {
+    this.setState({
+      filterText: filterText
+    });
+  }
+
+  render() {
+    return (
+      <div>
+        <SearchBar
+          filterText={this.state.filterText}
+          onUserInput={this.handleUserInput}
+        />
+      <ChannelTable
+          channels={this.props.channels}
+          filterText={this.state.filterText}
+          chooseChannel={this.props.chooseChannel}
+          tableName={this.props.tableName}
+        />
+      </div>
     );
   }
 }
@@ -30,31 +119,36 @@ class ChannelForm extends React.Component{
       selectedChannel: null,
       channels: []
     };
-    this.changeChannel = this.changeChannel.bind(this);
+    this.chooseChannel = this.chooseChannel.bind(this);
     this.props.fetchChannels();
   }
-  changeChannel(newChannel) {
+  chooseChannel(newChannel) {
+    console.log("Channel " + newChannel + "choosed!");
     this.setState({
       selectedChannel: newChannel
     });
   }
   render() {
-    const channelList = this.props.channels;
-    if (channelList === undefined || channelList.length === 0) {
+    const allChannels = this.props.channels;
+    const usersOwnChannels = ["Oma kannu", "private message"]
+    if (allChannels === undefined || allChannels.length === 0) {
       return(
         <div><p>Fetching</p></div>
       );
     }
+    const ownChannels = this.props.username + "\'s Channels";
     return (
       <div>
-        <h2>{this.props.username} s Channels</h2>
-        <ul>{channelList.map((channel, i) =>
-          <ChannelRow key={i}
-                      index={i}
-                      channel={channel}
-                      selected={this.state.selectedChannel}
-                      changeChannel={this.changeChannel} />
-        )}</ul>
+        <div id="allChannelsBox">
+          <FilterableChannelTable channels={allChannels}
+                                  chooseChannel={this.chooseChannel}
+                                  tableName="All channels"/>
+        </div>
+        <div id="ownChannelsBox">
+          <FilterableChannelTable channels={usersOwnChannels}
+                                  chooseChannel={this.chooseChannel}
+                                  tableName={ownChannels}/>
+        </div>
       </div>
     );
   }

@@ -8,7 +8,7 @@ body{
 }
 
 #messages {
-  height: auto;
+  
 }
 #left{
   width: 33.33%;
@@ -26,5 +26,10 @@ body{
   width: 33.33%;
   width: calc(100% / 3);
   display: inline-block;
-  background-color: green;
+}
+#allChannelsBox {
+  height: 50%;
+}
+#ownChannelsBox {
+  height: 50%;
 }

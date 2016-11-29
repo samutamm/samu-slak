@@ -93,11 +93,11 @@
 	
 	var _authReducer2 = _interopRequireDefault(_authReducer);
 	
-	var _channelsReducer = __webpack_require__(/*! ./reducers/channels-reducer */ 302);
+	var _channelsReducer = __webpack_require__(/*! ./reducers/channels-reducer */ 301);
 	
 	var _channelsReducer2 = _interopRequireDefault(_channelsReducer);
 	
-	var _AuthenticatedComponent = __webpack_require__(/*! ./components/AuthenticatedComponent.jsx */ 301);
+	var _AuthenticatedComponent = __webpack_require__(/*! ./components/AuthenticatedComponent.jsx */ 302);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -30197,16 +30197,8 @@
 	          { id: 'left' },
 	          _react2.default.createElement(_channels.Channels, null)
 	        ),
-	        _react2.default.createElement(
-	          'div',
-	          { id: 'center' },
-	          'text'
-	        ),
-	        _react2.default.createElement(
-	          'div',
-	          { id: 'right' },
-	          'text'
-	        )
+	        _react2.default.createElement('div', { id: 'center' }),
+	        _react2.default.createElement('div', { id: 'right' })
 	      );
 	    }
 	  }]);
@@ -30273,18 +30265,24 @@
 	    key: 'handleClick',
 	    value: function handleClick(e) {
 	      e.preventDefault();
-	      if (this.props.index !== this.props.selected) {
-	        this.props.changeChannel(this.props.index);
-	      }
+	      this.props.chooseChannel(this.props.channel);
 	    }
 	  }, {
 	    key: 'render',
 	    value: function render() {
-	      var rowClass = this.props.index === this.props.selected ? "selected" : "not-selected";
-	      return _react2.default.createElement(
-	        'li',
-	        { className: rowClass, key: this.props.index, onClick: this.handleClick },
+	      var name = this.props.channel.stocked ? this.props.channel : _react2.default.createElement(
+	        'span',
+	        { style: { color: 'red' } },
 	        this.props.channel
+	      );
+	      return _react2.default.createElement(
+	        'tr',
+	        null,
+	        _react2.default.createElement(
+	          'td',
+	          { onClick: this.handleClick },
+	          name
+	        )
 	      );
 	    }
 	  }]);
@@ -30292,26 +30290,166 @@
 	  return ChannelRow;
 	}(_react2.default.Component);
 	
-	var ChannelForm = function (_React$Component2) {
-	  _inherits(ChannelForm, _React$Component2);
+	var ChannelTable = function (_React$Component2) {
+	  _inherits(ChannelTable, _React$Component2);
+	
+	  function ChannelTable() {
+	    _classCallCheck(this, ChannelTable);
+	
+	    return _possibleConstructorReturn(this, (ChannelTable.__proto__ || Object.getPrototypeOf(ChannelTable)).apply(this, arguments));
+	  }
+	
+	  _createClass(ChannelTable, [{
+	    key: 'render',
+	    value: function render() {
+	      var _this3 = this;
+	
+	      var rows = [];
+	      this.props.channels.forEach(function (channel) {
+	        if (channel.indexOf(_this3.props.filterText) === -1) {
+	          return;
+	        }
+	        rows.push(_react2.default.createElement(ChannelRow, { channel: channel,
+	          key: channel,
+	          chooseChannel: _this3.props.chooseChannel }));
+	      });
+	      var tableName = this.props.tableName;
+	      return _react2.default.createElement(
+	        'table',
+	        null,
+	        _react2.default.createElement(
+	          'thead',
+	          null,
+	          _react2.default.createElement(
+	            'tr',
+	            null,
+	            _react2.default.createElement(
+	              'th',
+	              null,
+	              tableName
+	            )
+	          )
+	        ),
+	        _react2.default.createElement(
+	          'tbody',
+	          null,
+	          rows
+	        )
+	      );
+	    }
+	  }]);
+	
+	  return ChannelTable;
+	}(_react2.default.Component);
+	
+	var SearchBar = function (_React$Component3) {
+	  _inherits(SearchBar, _React$Component3);
+	
+	  function SearchBar(props) {
+	    _classCallCheck(this, SearchBar);
+	
+	    var _this4 = _possibleConstructorReturn(this, (SearchBar.__proto__ || Object.getPrototypeOf(SearchBar)).call(this, props));
+	
+	    _this4.handleChange = _this4.handleChange.bind(_this4);
+	    return _this4;
+	  }
+	
+	  _createClass(SearchBar, [{
+	    key: 'handleChange',
+	    value: function handleChange() {
+	      this.props.onUserInput(this.filterTextInput.value);
+	    }
+	  }, {
+	    key: 'render',
+	    value: function render() {
+	      var _this5 = this;
+	
+	      return _react2.default.createElement(
+	        'form',
+	        null,
+	        _react2.default.createElement('input', {
+	          type: 'text',
+	          placeholder: 'Search...',
+	          value: this.props.filterText,
+	          ref: function ref(input) {
+	            return _this5.filterTextInput = input;
+	          },
+	          onChange: this.handleChange
+	        })
+	      );
+	    }
+	  }]);
+	
+	  return SearchBar;
+	}(_react2.default.Component);
+	
+	var FilterableChannelTable = function (_React$Component4) {
+	  _inherits(FilterableChannelTable, _React$Component4);
+	
+	  function FilterableChannelTable(props) {
+	    _classCallCheck(this, FilterableChannelTable);
+	
+	    var _this6 = _possibleConstructorReturn(this, (FilterableChannelTable.__proto__ || Object.getPrototypeOf(FilterableChannelTable)).call(this, props));
+	
+	    _this6.state = {
+	      filterText: ''
+	    };
+	
+	    _this6.handleUserInput = _this6.handleUserInput.bind(_this6);
+	    return _this6;
+	  }
+	
+	  _createClass(FilterableChannelTable, [{
+	    key: 'handleUserInput',
+	    value: function handleUserInput(filterText) {
+	      this.setState({
+	        filterText: filterText
+	      });
+	    }
+	  }, {
+	    key: 'render',
+	    value: function render() {
+	      return _react2.default.createElement(
+	        'div',
+	        null,
+	        _react2.default.createElement(SearchBar, {
+	          filterText: this.state.filterText,
+	          onUserInput: this.handleUserInput
+	        }),
+	        _react2.default.createElement(ChannelTable, {
+	          channels: this.props.channels,
+	          filterText: this.state.filterText,
+	          chooseChannel: this.props.chooseChannel,
+	          tableName: this.props.tableName
+	        })
+	      );
+	    }
+	  }]);
+	
+	  return FilterableChannelTable;
+	}(_react2.default.Component);
+	
+	var ChannelForm = function (_React$Component5) {
+	  _inherits(ChannelForm, _React$Component5);
 	
 	  function ChannelForm(props) {
 	    _classCallCheck(this, ChannelForm);
 	
-	    var _this2 = _possibleConstructorReturn(this, (ChannelForm.__proto__ || Object.getPrototypeOf(ChannelForm)).call(this, props));
+	    var _this7 = _possibleConstructorReturn(this, (ChannelForm.__proto__ || Object.getPrototypeOf(ChannelForm)).call(this, props));
 	
-	    _this2.state = {
+	    _this7.state = {
 	      selectedChannel: null,
 	      channels: []
 	    };
-	    _this2.changeChannel = _this2.changeChannel.bind(_this2);
-	    _this2.props.fetchChannels();
-	    return _this2;
+	    _this7.chooseChannel = _this7.chooseChannel.bind(_this7);
+	    _this7.props.fetchChannels();
+	    return _this7;
 	  }
 	
 	  _createClass(ChannelForm, [{
-	    key: 'changeChannel',
-	    value: function changeChannel(newChannel) {
+	    key: 'chooseChannel',
+	    value: function chooseChannel(newChannel) {
+	      console.log("Channel " + newChannel + "choosed!");
 	      this.setState({
 	        selectedChannel: newChannel
 	      });
@@ -30319,10 +30457,9 @@
 	  }, {
 	    key: 'render',
 	    value: function render() {
-	      var _this3 = this;
-	
-	      var channelList = this.props.channels;
-	      if (channelList === undefined || channelList.length === 0) {
+	      var allChannels = this.props.channels;
+	      var usersOwnChannels = ["Oma kannu", "private message"];
+	      if (allChannels === undefined || allChannels.length === 0) {
 	        return _react2.default.createElement(
 	          'div',
 	          null,
@@ -30333,25 +30470,23 @@
 	          )
 	        );
 	      }
+	      var ownChannels = this.props.username + "\'s Channels";
 	      return _react2.default.createElement(
 	        'div',
 	        null,
 	        _react2.default.createElement(
-	          'h2',
-	          null,
-	          this.props.username,
-	          ' s Channels'
+	          'div',
+	          { id: 'allChannelsBox' },
+	          _react2.default.createElement(FilterableChannelTable, { channels: allChannels,
+	            chooseChannel: this.chooseChannel,
+	            tableName: 'All channels' })
 	        ),
 	        _react2.default.createElement(
-	          'ul',
-	          null,
-	          channelList.map(function (channel, i) {
-	            return _react2.default.createElement(ChannelRow, { key: i,
-	              index: i,
-	              channel: channel,
-	              selected: _this3.state.selectedChannel,
-	              changeChannel: _this3.changeChannel });
-	          })
+	          'div',
+	          { id: 'ownChannelsBox' },
+	          _react2.default.createElement(FilterableChannelTable, { channels: usersOwnChannels,
+	            chooseChannel: this.chooseChannel,
+	            tableName: ownChannels })
 	        )
 	      );
 	    }
@@ -37371,6 +37506,53 @@
 
 /***/ },
 /* 301 */
+/*!*************************************************!*\
+  !*** ./client/app/reducers/channels-reducer.js ***!
+  \*************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	exports.default = function () {
+	  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initial();
+	  var action = arguments[1];
+	
+	  switch (action.type) {
+	    case 'CHANNEL-REQUEST':
+	      return setFetchingFlag(state);
+	    case 'SET_CHANNELS':
+	      return setFetched(state, action.channels);
+	  }
+	  return state;
+	};
+	
+	var _immutable = __webpack_require__(/*! immutable */ 271);
+	
+	function initial() {
+	  return (0, _immutable.Map)({
+	    channels: [],
+	    isFetching: false
+	  });
+	}
+	
+	function setFetchingFlag(state) {
+	  return state.setIn(['isFetching'], true);
+	}
+	
+	function setFetched(state, channels) {
+	  var channelsList = channels.map(function (item) {
+	    return item.channels.data.name;
+	  });
+	  var channelsAdded = state.setIn(['channels'], channelsList);
+	  return channelsAdded.setIn(['isFetching'], false);
+	}
+
+/***/ },
+/* 302 */
 /*!**********************************************************!*\
   !*** ./client/app/components/AuthenticatedComponent.jsx ***!
   \**********************************************************/
@@ -37430,53 +37612,6 @@
 	  };
 	
 	  return (0, _reactRedux.connect)(mapStateToProps, actionCreators)(AuthenticatedComponent);
-	}
-
-/***/ },
-/* 302 */
-/*!*************************************************!*\
-  !*** ./client/app/reducers/channels-reducer.js ***!
-  \*************************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	
-	exports.default = function () {
-	  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initial();
-	  var action = arguments[1];
-	
-	  switch (action.type) {
-	    case 'CHANNEL-REQUEST':
-	      return setFetchingFlag(state);
-	    case 'SET_CHANNELS':
-	      return setFetched(state, action.channels);
-	  }
-	  return state;
-	};
-	
-	var _immutable = __webpack_require__(/*! immutable */ 271);
-	
-	function initial() {
-	  return (0, _immutable.Map)({
-	    channels: [],
-	    isFetching: false
-	  });
-	}
-	
-	function setFetchingFlag(state) {
-	  return state.setIn(['isFetching'], true);
-	}
-	
-	function setFetched(state, channels) {
-	  var channelsList = channels.map(function (item) {
-	    return item.channels.data.name;
-	  });
-	  var channelsAdded = state.setIn(['channels'], channelsList);
-	  return channelsAdded.setIn(['isFetching'], false);
 	}
 
 /***/ }
