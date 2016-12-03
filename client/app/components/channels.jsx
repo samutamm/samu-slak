@@ -2,7 +2,6 @@ import React from 'react';
 import {connect} from 'react-redux';
 import * as actionCreators from '../actions/channels';
 
-
 class ChannelRow extends React.Component {
   constructor(props) {
     super(props);
@@ -84,7 +83,6 @@ class FilterableChannelTable extends React.Component {
     this.state = {
       filterText: ''
     };
-
     this.handleUserInput = this.handleUserInput.bind(this);
   }
 
@@ -119,14 +117,15 @@ class ChannelForm extends React.Component{
       selectedChannel: null,
       channels: []
     };
-    this.chooseChannel = this.chooseChannel.bind(this);
+    this.clickPublicChannels = this.clickPublicChannels.bind(this);
+    this.clickOwnChannels = this.clickOwnChannels.bind(this);
     this.props.fetchChannels();
   }
-  chooseChannel(newChannel) {
-    console.log("Channel " + newChannel + "choosed!");
-    this.setState({
-      selectedChannel: newChannel
-    });
+  clickPublicChannels(newChannel) {
+    this.props.joinUserToChannel(newChannel, this.props.username);
+  }
+  clickOwnChannels(newChannel) {
+    console.log("Channel " + newChannel + " clicked!");
   }
   render() {
     const allChannels = this.props.channels;
@@ -141,12 +140,12 @@ class ChannelForm extends React.Component{
       <div>
         <div id="allChannelsBox">
           <FilterableChannelTable channels={allChannels}
-                                  chooseChannel={this.chooseChannel}
+                                  chooseChannel={this.clickPublicChannels}
                                   tableName="All channels"/>
         </div>
         <div id="ownChannelsBox">
           <FilterableChannelTable channels={usersOwnChannels}
-                                  chooseChannel={this.chooseChannel}
+                                  chooseChannel={this.clickOwnChannels}
                                   tableName={ownChannels}/>
         </div>
       </div>

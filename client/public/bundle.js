@@ -30394,7 +30394,6 @@
 	    _this6.state = {
 	      filterText: ''
 	    };
-	
 	    _this6.handleUserInput = _this6.handleUserInput.bind(_this6);
 	    return _this6;
 	  }
@@ -30441,18 +30440,21 @@
 	      selectedChannel: null,
 	      channels: []
 	    };
-	    _this7.chooseChannel = _this7.chooseChannel.bind(_this7);
+	    _this7.clickPublicChannels = _this7.clickPublicChannels.bind(_this7);
+	    _this7.clickOwnChannels = _this7.clickOwnChannels.bind(_this7);
 	    _this7.props.fetchChannels();
 	    return _this7;
 	  }
 	
 	  _createClass(ChannelForm, [{
-	    key: 'chooseChannel',
-	    value: function chooseChannel(newChannel) {
-	      console.log("Channel " + newChannel + "choosed!");
-	      this.setState({
-	        selectedChannel: newChannel
-	      });
+	    key: 'clickPublicChannels',
+	    value: function clickPublicChannels(newChannel) {
+	      this.props.joinUserToChannel(newChannel, this.props.username);
+	    }
+	  }, {
+	    key: 'clickOwnChannels',
+	    value: function clickOwnChannels(newChannel) {
+	      console.log("Channel " + newChannel + " clicked!");
 	    }
 	  }, {
 	    key: 'render',
@@ -30478,14 +30480,14 @@
 	          'div',
 	          { id: 'allChannelsBox' },
 	          _react2.default.createElement(FilterableChannelTable, { channels: allChannels,
-	            chooseChannel: this.chooseChannel,
+	            chooseChannel: this.clickPublicChannels,
 	            tableName: 'All channels' })
 	        ),
 	        _react2.default.createElement(
 	          'div',
 	          { id: 'ownChannelsBox' },
 	          _react2.default.createElement(FilterableChannelTable, { channels: usersOwnChannels,
-	            chooseChannel: this.chooseChannel,
+	            chooseChannel: this.clickOwnChannels,
 	            tableName: ownChannels })
 	        )
 	      );
@@ -30517,6 +30519,7 @@
 	  value: true
 	});
 	exports.fetchChannels = fetchChannels;
+	exports.joinUserToChannel = joinUserToChannel;
 	exports.receiveChannels = receiveChannels;
 	
 	var _immutable = __webpack_require__(/*! immutable */ 271);
@@ -30527,9 +30530,19 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
+	var organization = "samu"; //Hard coded at the moment
+	var baseURL = "http://localhost:8080";
+	
 	function request() {
 	  return {
 	    type: 'CHANNEL-REQUEST'
+	  };
+	}
+	
+	function receiveError(message) {
+	  return {
+	    type: 'RECEIVE_ERROR',
+	    error: message
 	  };
 	}
 	
@@ -30538,15 +30551,34 @@
 	    dispatch(request());
 	    _axios2.default.get('/channels', {
 	      params: {
-	        organization: "samu" //Hard coded at the moment
+	        organization: organization
 	      },
-	      url: "/channels",
 	      method: 'get',
-	      baseURL: "http://localhost:8080"
+	      baseURL: baseURL
 	    }).then(function (response) {
 	      dispatch(receiveChannels(response.data));
 	    }).catch(function (error) {
-	      console.log(error);
+	      dispatch(receiveError(error));
+	    });
+	  };
+	}
+	
+	function joinChannel(channelName, username) {
+	  return function (dispatch) {
+	    dispatch(request());
+	    _axios2.default.post('/channels/join', {
+	      organization: organization,
+	      channel: channelName,
+	      username: username
+	    }, {
+	      method: 'post',
+	      baseURL: baseURL
+	    }).then(function (response) {
+	      debugger;
+	      dispatch(joinedSuccess());
+	    }).catch(function (error) {
+	      debugger;
+	      dispatch(receiveError(error));
 	    });
 	  };
 	}
@@ -30561,6 +30593,16 @@
 	  };
 	}
 	
+	function joinUserToChannel(channelName, username) {
+	  return function (dispatch, getState) {
+	    if (canFetch(getState().channels)) {
+	      return dispatch(joinChannel(channelName, username));
+	    } else {
+	      return Promise.resolve();
+	    }
+	  };
+	}
+	
 	function canFetch(state) {
 	  return !state.getIn(['isFetching']);
 	}
@@ -30569,6 +30611,12 @@
 	  return {
 	    type: 'SET_CHANNELS',
 	    channels: channels
+	  };
+	}
+	
+	function joinedSuccess() {
+	  return {
+	    type: 'SET_JOINED'
 	  };
 	}
 
@@ -37526,6 +37574,11 @@
 	      return setFetchingFlag(state);
 	    case 'SET_CHANNELS':
 	      return setFetched(state, action.channels);
+	    case 'RECEIVE_ERROR':
+	      return removeFetchingFlag(state);
+	    case 'SET_JOINED':
+	      return removeFetchingFlag(state);
+	
 	  }
 	  return state;
 	};
@@ -37545,10 +37598,14 @@
 	
 	function setFetched(state, channels) {
 	  var channelsList = channels.map(function (item) {
-	    return item.channels.data.name;
+	    return item.name;
 	  });
 	  var channelsAdded = state.setIn(['channels'], channelsList);
-	  return channelsAdded.setIn(['isFetching'], false);
+	  return removeFetchingFlag(channelsAdded);
+	}
+	
+	function removeFetchingFlag(state) {
+	  return state.setIn(['isFetching'], false);
 	}
 
 /***/ },

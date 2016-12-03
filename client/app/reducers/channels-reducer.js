@@ -13,10 +13,14 @@ function setFetchingFlag(state) {
 
 function setFetched(state, channels) {
   const channelsList = channels.map(function(item){
-    return item.channels.data.name;
+    return item.name;
   })
   const channelsAdded = state.setIn(['channels'], channelsList);
-  return channelsAdded.setIn(['isFetching'], false);
+  return removeFetchingFlag(channelsAdded);
+}
+
+function removeFetchingFlag(state) {
+  return state.setIn(['isFetching'], false);
 }
 
 export default function(state = initial(), action) {
@@ -25,6 +29,11 @@ export default function(state = initial(), action) {
       return setFetchingFlag(state);
     case 'SET_CHANNELS':
         return setFetched(state, action.channels);
+    case 'RECEIVE_ERROR':
+        return removeFetchingFlag(state);
+    case 'SET_JOINED':
+        return removeFetchingFlag(state);
+
   }
   return state;
 }
