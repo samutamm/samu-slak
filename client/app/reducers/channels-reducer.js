@@ -3,36 +3,43 @@ import {List, Map, fromJS} from 'immutable';
 function initial() {
   return Map({
     channels: [],
-    isFetching: false
+    usersChannels: [],
+    isFetchingAll: false,
+    isFetchingUsers: false,
+    isJoining: false
   });
 }
 
-function setFetchingFlag(state) {
-  return state.setIn(['isFetching'], true);
+function setFetchingFlag(state, resourse) {
+  return state.setIn([resourse], true);
 }
 
-function setFetched(state, channels) {
+function setFetched(state, channels, tag, resourse) {
   const channelsList = channels.map(function(item){
     return item.name;
   })
-  const channelsAdded = state.setIn(['channels'], channelsList);
-  return removeFetchingFlag(channelsAdded);
+  const channelsAdded = state.setIn([tag], channelsList);
+  return removeFetchingFlag(channelsAdded, resourse);
 }
 
-function removeFetchingFlag(state) {
-  return state.setIn(['isFetching'], false);
+function removeFetchingFlag(state, resourse) {
+  return state.setIn([resourse], false);
 }
 
 export default function(state = initial(), action) {
   switch (action.type) {
     case 'CHANNEL-REQUEST':
-      return setFetchingFlag(state);
+      return setFetchingFlag(state, action.resourse);
     case 'SET_CHANNELS':
-        return setFetched(state, action.channels);
+        return setFetched(state, action.channels, 'channels', 'isFetchingAll');
     case 'RECEIVE_ERROR':
-        return removeFetchingFlag(state);
+        state = removeFetchingFlag(state, 'isJoining');
+        state = removeFetchingFlag(state, 'isFetchingUsers');
+        return removeFetchingFlag(state, 'isFetchingAll');
     case 'SET_JOINED':
-        return removeFetchingFlag(state);
+        return removeFetchingFlag(state, 'isJoining');
+    case 'SET_USERS_CHANNELS':
+        return setFetched(state, action.channels, 'usersChannels', 'isFetchingUsers');
 
   }
   return state;

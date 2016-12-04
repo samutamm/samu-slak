@@ -30443,6 +30443,7 @@
 	    _this7.clickPublicChannels = _this7.clickPublicChannels.bind(_this7);
 	    _this7.clickOwnChannels = _this7.clickOwnChannels.bind(_this7);
 	    _this7.props.fetchChannels();
+	    _this7.props.fetchUsersChannels(_this7.props.username);
 	    return _this7;
 	  }
 	
@@ -30460,7 +30461,7 @@
 	    key: 'render',
 	    value: function render() {
 	      var allChannels = this.props.channels;
-	      var usersOwnChannels = ["Oma kannu", "private message"];
+	      var usersOwnChannels = this.props.usersChannels;
 	      if (allChannels === undefined || allChannels.length === 0) {
 	        return _react2.default.createElement(
 	          'div',
@@ -30500,7 +30501,8 @@
 	function mapStateToProps(state) {
 	  return {
 	    username: state.auth.getIn(["session", "username"]),
-	    channels: state.channels.getIn(['channels'])
+	    channels: state.channels.getIn(['channels']),
+	    usersChannels: state.channels.getIn(['usersChannels'])
 	  };
 	}
 	
@@ -30520,6 +30522,7 @@
 	});
 	exports.fetchChannels = fetchChannels;
 	exports.joinUserToChannel = joinUserToChannel;
+	exports.fetchUsersChannels = fetchUsersChannels;
 	exports.receiveChannels = receiveChannels;
 	
 	var _immutable = __webpack_require__(/*! immutable */ 271);
@@ -30533,9 +30536,10 @@
 	var organization = "samu"; //Hard coded at the moment
 	var baseURL = "http://localhost:8080";
 	
-	function request() {
+	function request(resourse) {
 	  return {
-	    type: 'CHANNEL-REQUEST'
+	    type: 'CHANNEL-REQUEST',
+	    resourse: resourse
 	  };
 	}
 	
@@ -30548,7 +30552,7 @@
 	
 	function fetch() {
 	  return function (dispatch) {
-	    dispatch(request());
+	    dispatch(request('isFetchingAll'));
 	    _axios2.default.get('/channels', {
 	      params: {
 	        organization: organization
@@ -30563,21 +30567,42 @@
 	  };
 	}
 	
+	function fetchUsers(username) {
+	  return function (dispatch) {
+	    dispatch(request('isFetchingUsers'));
+	    _axios2.default.get('/channels', {
+	      params: {
+	        organization: organization,
+	        username: username
+	      },
+	      method: 'get',
+	      baseURL: baseURL
+	    }).then(function (response) {
+	      dispatch(receiveUsersChannels(response.data));
+	    }).catch(function (error) {
+	      dispatch(receiveError(error));
+	    });
+	  };
+	}
+	
 	function joinChannel(channelName, username) {
 	  return function (dispatch) {
-	    dispatch(request());
-	    _axios2.default.post('/channels/join', {
-	      organization: organization,
-	      channel: channelName,
-	      username: username
-	    }, {
+	    dispatch(request('isJoining'));
+	    (0, _axios2.default)({
+	      url: '/channels/join',
+	      params: {
+	        organization: organization,
+	        channel: channelName,
+	        username: username
+	      },
+	      headers: {
+	        'Content-Type': 'text/plain'
+	      },
 	      method: 'post',
 	      baseURL: baseURL
 	    }).then(function (response) {
-	      debugger;
 	      dispatch(joinedSuccess());
 	    }).catch(function (error) {
-	      debugger;
 	      dispatch(receiveError(error));
 	    });
 	  };
@@ -30585,7 +30610,7 @@
 	
 	function fetchChannels() {
 	  return function (dispatch, getState) {
-	    if (canFetch(getState().channels)) {
+	    if (canFetch(getState().channels, 'isFetchingAll')) {
 	      return dispatch(fetch());
 	    } else {
 	      return Promise.resolve();
@@ -30595,7 +30620,7 @@
 	
 	function joinUserToChannel(channelName, username) {
 	  return function (dispatch, getState) {
-	    if (canFetch(getState().channels)) {
+	    if (canFetch(getState().channels, 'isJoining')) {
 	      return dispatch(joinChannel(channelName, username));
 	    } else {
 	      return Promise.resolve();
@@ -30603,8 +30628,18 @@
 	  };
 	}
 	
-	function canFetch(state) {
-	  return !state.getIn(['isFetching']);
+	function fetchUsersChannels(username) {
+	  return function (dispatch, getState) {
+	    if (canFetch(getState().channels, 'isFetchingUsers')) {
+	      return dispatch(fetchUsers(username));
+	    } else {
+	      return Promise.resolve();
+	    }
+	  };
+	}
+	
+	function canFetch(state, resourse) {
+	  return !state.getIn([resourse]);
 	}
 	
 	function receiveChannels(channels) {
@@ -30617,6 +30652,13 @@
 	function joinedSuccess() {
 	  return {
 	    type: 'SET_JOINED'
+	  };
+	}
+	
+	function receiveUsersChannels(channels) {
+	  return {
+	    type: 'SET_USERS_CHANNELS',
+	    channels: channels
 	  };
 	}
 
@@ -37571,13 +37613,17 @@
 	
 	  switch (action.type) {
 	    case 'CHANNEL-REQUEST':
-	      return setFetchingFlag(state);
+	      return setFetchingFlag(state, action.resourse);
 	    case 'SET_CHANNELS':
-	      return setFetched(state, action.channels);
+	      return setFetched(state, action.channels, 'channels', 'isFetchingAll');
 	    case 'RECEIVE_ERROR':
-	      return removeFetchingFlag(state);
+	      state = removeFetchingFlag(state, 'isJoining');
+	      state = removeFetchingFlag(state, 'isFetchingUsers');
+	      return removeFetchingFlag(state, 'isFetchingAll');
 	    case 'SET_JOINED':
-	      return removeFetchingFlag(state);
+	      return removeFetchingFlag(state, 'isJoining');
+	    case 'SET_USERS_CHANNELS':
+	      return setFetched(state, action.channels, 'usersChannels', 'isFetchingUsers');
 	
 	  }
 	  return state;
@@ -37588,24 +37634,27 @@
 	function initial() {
 	  return (0, _immutable.Map)({
 	    channels: [],
-	    isFetching: false
+	    usersChannels: [],
+	    isFetchingAll: false,
+	    isFetchingUsers: false,
+	    isJoining: false
 	  });
 	}
 	
-	function setFetchingFlag(state) {
-	  return state.setIn(['isFetching'], true);
+	function setFetchingFlag(state, resourse) {
+	  return state.setIn([resourse], true);
 	}
 	
-	function setFetched(state, channels) {
+	function setFetched(state, channels, tag, resourse) {
 	  var channelsList = channels.map(function (item) {
 	    return item.name;
 	  });
-	  var channelsAdded = state.setIn(['channels'], channelsList);
-	  return removeFetchingFlag(channelsAdded);
+	  var channelsAdded = state.setIn([tag], channelsList);
+	  return removeFetchingFlag(channelsAdded, resourse);
 	}
 	
-	function removeFetchingFlag(state) {
-	  return state.setIn(['isFetching'], false);
+	function removeFetchingFlag(state, resourse) {
+	  return state.setIn([resourse], false);
 	}
 
 /***/ },

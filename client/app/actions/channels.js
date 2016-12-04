@@ -4,9 +4,10 @@ import axios from 'axios';
 const organization = "samu"; //Hard coded at the moment
 const baseURL = "http://localhost:8080";
 
-function request() {
+function request(resourse) {
   return {
-    type: 'CHANNEL-REQUEST'
+    type: 'CHANNEL-REQUEST',
+    resourse: resourse
   };
 }
 
@@ -19,7 +20,7 @@ function receiveError(message) {
 
 function fetch() {
   return dispatch => {
-    dispatch(request());
+    dispatch(request('isFetchingAll'));
     axios.get('/channels', {
       params: {
         organization: organization
@@ -34,22 +35,42 @@ function fetch() {
   }
 }
 
-function joinChannel(channelName, username) {
+function fetchUsers(username) {
   return dispatch => {
-    dispatch(request());
-    axios.post('/channels/join', {
+    dispatch(request('isFetchingUsers'));
+    axios.get('/channels', {
+      params: {
         organization: organization,
-        channel: channelName,
         username: username
       },
-      {
+      method: 'get',
+      baseURL: baseURL,
+    }).then(function (response) {
+      dispatch(receiveUsersChannels(response.data));
+    }).catch(function (error) {
+      dispatch(receiveError(error));
+    });
+  }
+}
+
+function joinChannel(channelName, username) {
+  return dispatch => {
+    dispatch(request('isJoining'));
+    axios({
+        url: '/channels/join',
+        params: {
+          organization: organization,
+          channel: channelName,
+          username: username
+        },
+        headers: {
+          'Content-Type':'text/plain'
+        },
         method: 'post',
         baseURL: baseURL
       }).then(function (response) {
-        debugger;
       dispatch(joinedSuccess());
     }).catch(function (error) {
-      debugger;
       dispatch(receiveError(error));
     });
   }
@@ -57,7 +78,7 @@ function joinChannel(channelName, username) {
 
 export function fetchChannels() {
   return (dispatch, getState) => {
-    if (canFetch(getState().channels)) {
+    if (canFetch(getState().channels, 'isFetchingAll')) {
       return dispatch(fetch());
     } else {
       return Promise.resolve()
@@ -67,7 +88,7 @@ export function fetchChannels() {
 
 export function joinUserToChannel(channelName, username) {
   return (dispatch, getState) => {
-    if (canFetch(getState().channels)) {
+    if (canFetch(getState().channels, 'isJoining')) {
       return dispatch(joinChannel(channelName, username));
     } else {
       return Promise.resolve()
@@ -75,8 +96,18 @@ export function joinUserToChannel(channelName, username) {
   }
 }
 
-function canFetch(state) {
-  return !state.getIn(['isFetching']);
+export function fetchUsersChannels(username) {
+  return (dispatch, getState) => {
+    if (canFetch(getState().channels, 'isFetchingUsers')) {
+      return dispatch(fetchUsers(username));
+    } else {
+      return Promise.resolve()
+    }
+  }
+}
+
+function canFetch(state, resourse) {
+  return !state.getIn([resourse]);
 }
 
 export function receiveChannels(channels) {
@@ -89,5 +120,12 @@ export function receiveChannels(channels) {
 function joinedSuccess() {
   return {
     type: 'SET_JOINED'
+  };
+}
+
+function receiveUsersChannels(channels) {
+  return {
+    type: 'SET_USERS_CHANNELS',
+    channels: channels
   };
 }

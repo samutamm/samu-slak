@@ -120,6 +120,7 @@ class ChannelForm extends React.Component{
     this.clickPublicChannels = this.clickPublicChannels.bind(this);
     this.clickOwnChannels = this.clickOwnChannels.bind(this);
     this.props.fetchChannels();
+    this.props.fetchUsersChannels(this.props.username);
   }
   clickPublicChannels(newChannel) {
     this.props.joinUserToChannel(newChannel, this.props.username);
@@ -129,7 +130,7 @@ class ChannelForm extends React.Component{
   }
   render() {
     const allChannels = this.props.channels;
-    const usersOwnChannels = ["Oma kannu", "private message"]
+    const usersOwnChannels = this.props.usersChannels;
     if (allChannels === undefined || allChannels.length === 0) {
       return(
         <div><p>Fetching</p></div>
@@ -156,7 +157,8 @@ class ChannelForm extends React.Component{
 function mapStateToProps(state) {
   return {
     username: state.auth.getIn(["session","username"]),
-    channels: state.channels.getIn(['channels'])
+    channels: state.channels.getIn(['channels']),
+    usersChannels: state.channels.getIn(['usersChannels'])
   };
 }
 
