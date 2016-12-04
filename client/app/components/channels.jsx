@@ -6,10 +6,15 @@ class ChannelRow extends React.Component {
   constructor(props) {
     super(props);
     this.handleClick = this.handleClick.bind(this);
+    this.quitChannel = this.quitChannel.bind(this);
   }
   handleClick(e) {
     e.preventDefault();
     this.props.chooseChannel(this.props.channel);
+  }
+  quitChannel(e) {
+    e.preventDefault();
+    this.props.quitChannel(this.props.channel);
   }
   render() {
     var name = this.props.channel.stocked ?
@@ -19,7 +24,7 @@ class ChannelRow extends React.Component {
       </span>;
     return (
       <tr>
-        <td onClick={this.handleClick}>{name}</td>
+        <td><span onClick={this.handleClick}>{name}</span> <span onClick={this.quitChannel}>QUIT</span></td>
       </tr>
     );
   }
@@ -34,7 +39,8 @@ class ChannelTable extends React.Component {
       }
       rows.push(<ChannelRow channel={channel}
                             key={channel}
-                            chooseChannel={this.props.chooseChannel} />);
+                            chooseChannel={this.props.chooseChannel}
+                            quitChannel={this.props.quitChannel} />);
     });
     const tableName = this.props.tableName;
     return (
@@ -104,6 +110,7 @@ class FilterableChannelTable extends React.Component {
           filterText={this.state.filterText}
           chooseChannel={this.props.chooseChannel}
           tableName={this.props.tableName}
+          quitChannel={this.props.quitChannel}
         />
       </div>
     );
@@ -113,20 +120,21 @@ class FilterableChannelTable extends React.Component {
 class ChannelForm extends React.Component{
   constructor(props) {
     super(props);
-    this.state = {
-      selectedChannel: null,
-      channels: []
-    };
     this.clickPublicChannels = this.clickPublicChannels.bind(this);
     this.clickOwnChannels = this.clickOwnChannels.bind(this);
+    this.quitChannel = this.quitChannel.bind(this);
     this.props.fetchChannels();
     this.props.fetchUsersChannels(this.props.username);
   }
   clickPublicChannels(newChannel) {
     this.props.joinUserToChannel(newChannel, this.props.username);
+    this.props.chooseChannel(newChannel);
   }
   clickOwnChannels(newChannel) {
-    console.log("Channel " + newChannel + " clicked!");
+    this.props.chooseChannel(newChannel);
+  }
+  quitChannel(channelName) {
+    console.log("QUIT: " + channelName);
   }
   render() {
     const allChannels = this.props.channels;
@@ -142,12 +150,14 @@ class ChannelForm extends React.Component{
         <div id="allChannelsBox">
           <FilterableChannelTable channels={allChannels}
                                   chooseChannel={this.clickPublicChannels}
-                                  tableName="All channels"/>
+                                  tableName="All channels"
+                                  quitChannel={this.quitChannel}/>
         </div>
         <div id="ownChannelsBox">
           <FilterableChannelTable channels={usersOwnChannels}
                                   chooseChannel={this.clickOwnChannels}
-                                  tableName={ownChannels}/>
+                                  tableName={ownChannels}
+                                  quitChannel={this.quitChannel}/>
         </div>
       </div>
     );

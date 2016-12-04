@@ -30168,6 +30168,8 @@
 	
 	var _channels = __webpack_require__(/*! ../channels.jsx */ 269);
 	
+	var _messages = __webpack_require__(/*! ../messages.jsx */ 303);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -30179,13 +30181,26 @@
 	var _class = function (_React$Component) {
 	  _inherits(_class, _React$Component);
 	
-	  function _class() {
+	  function _class(props) {
 	    _classCallCheck(this, _class);
 	
-	    return _possibleConstructorReturn(this, (_class.__proto__ || Object.getPrototypeOf(_class)).apply(this, arguments));
+	    var _this = _possibleConstructorReturn(this, (_class.__proto__ || Object.getPrototypeOf(_class)).call(this, props));
+	
+	    _this.state = {
+	      channel: null
+	    };
+	    _this.chooseChannel = _this.chooseChannel.bind(_this);
+	    return _this;
 	  }
 	
 	  _createClass(_class, [{
+	    key: 'chooseChannel',
+	    value: function chooseChannel(newChannel) {
+	      this.setState({
+	        channel: newChannel
+	      });
+	    }
+	  }, {
 	    key: 'render',
 	    value: function render() {
 	      return _react2.default.createElement(
@@ -30195,9 +30210,13 @@
 	        _react2.default.createElement(
 	          'div',
 	          { id: 'left' },
-	          _react2.default.createElement(_channels.Channels, null)
+	          _react2.default.createElement(_channels.Channels, { chooseChannel: this.chooseChannel })
 	        ),
-	        _react2.default.createElement('div', { id: 'center' }),
+	        _react2.default.createElement(
+	          'div',
+	          { id: 'center' },
+	          _react2.default.createElement(_messages.Messages, { channel: this.state.channel })
+	        ),
 	        _react2.default.createElement('div', { id: 'right' })
 	      );
 	    }
@@ -30258,6 +30277,7 @@
 	    var _this = _possibleConstructorReturn(this, (ChannelRow.__proto__ || Object.getPrototypeOf(ChannelRow)).call(this, props));
 	
 	    _this.handleClick = _this.handleClick.bind(_this);
+	    _this.quitChannel = _this.quitChannel.bind(_this);
 	    return _this;
 	  }
 	
@@ -30266,6 +30286,12 @@
 	    value: function handleClick(e) {
 	      e.preventDefault();
 	      this.props.chooseChannel(this.props.channel);
+	    }
+	  }, {
+	    key: 'quitChannel',
+	    value: function quitChannel(e) {
+	      e.preventDefault();
+	      this.props.quitChannel(this.props.channel);
 	    }
 	  }, {
 	    key: 'render',
@@ -30280,8 +30306,18 @@
 	        null,
 	        _react2.default.createElement(
 	          'td',
-	          { onClick: this.handleClick },
-	          name
+	          null,
+	          _react2.default.createElement(
+	            'span',
+	            { onClick: this.handleClick },
+	            name
+	          ),
+	          ' ',
+	          _react2.default.createElement(
+	            'span',
+	            { onClick: this.quitChannel },
+	            'QUIT'
+	          )
 	        )
 	      );
 	    }
@@ -30311,7 +30347,8 @@
 	        }
 	        rows.push(_react2.default.createElement(ChannelRow, { channel: channel,
 	          key: channel,
-	          chooseChannel: _this3.props.chooseChannel }));
+	          chooseChannel: _this3.props.chooseChannel,
+	          quitChannel: _this3.props.quitChannel }));
 	      });
 	      var tableName = this.props.tableName;
 	      return _react2.default.createElement(
@@ -30419,7 +30456,8 @@
 	          channels: this.props.channels,
 	          filterText: this.state.filterText,
 	          chooseChannel: this.props.chooseChannel,
-	          tableName: this.props.tableName
+	          tableName: this.props.tableName,
+	          quitChannel: this.props.quitChannel
 	        })
 	      );
 	    }
@@ -30436,12 +30474,9 @@
 	
 	    var _this7 = _possibleConstructorReturn(this, (ChannelForm.__proto__ || Object.getPrototypeOf(ChannelForm)).call(this, props));
 	
-	    _this7.state = {
-	      selectedChannel: null,
-	      channels: []
-	    };
 	    _this7.clickPublicChannels = _this7.clickPublicChannels.bind(_this7);
 	    _this7.clickOwnChannels = _this7.clickOwnChannels.bind(_this7);
+	    _this7.quitChannel = _this7.quitChannel.bind(_this7);
 	    _this7.props.fetchChannels();
 	    _this7.props.fetchUsersChannels(_this7.props.username);
 	    return _this7;
@@ -30451,11 +30486,17 @@
 	    key: 'clickPublicChannels',
 	    value: function clickPublicChannels(newChannel) {
 	      this.props.joinUserToChannel(newChannel, this.props.username);
+	      this.props.chooseChannel(newChannel);
 	    }
 	  }, {
 	    key: 'clickOwnChannels',
 	    value: function clickOwnChannels(newChannel) {
-	      console.log("Channel " + newChannel + " clicked!");
+	      this.props.chooseChannel(newChannel);
+	    }
+	  }, {
+	    key: 'quitChannel',
+	    value: function quitChannel(channelName) {
+	      console.log("QUIT: " + channelName);
 	    }
 	  }, {
 	    key: 'render',
@@ -30482,14 +30523,16 @@
 	          { id: 'allChannelsBox' },
 	          _react2.default.createElement(FilterableChannelTable, { channels: allChannels,
 	            chooseChannel: this.clickPublicChannels,
-	            tableName: 'All channels' })
+	            tableName: 'All channels',
+	            quitChannel: this.quitChannel })
 	        ),
 	        _react2.default.createElement(
 	          'div',
 	          { id: 'ownChannelsBox' },
 	          _react2.default.createElement(FilterableChannelTable, { channels: usersOwnChannels,
 	            chooseChannel: this.clickOwnChannels,
-	            tableName: ownChannels })
+	            tableName: ownChannels,
+	            quitChannel: this.quitChannel })
 	        )
 	      );
 	    }
@@ -37719,6 +37762,90 @@
 	
 	  return (0, _reactRedux.connect)(mapStateToProps, actionCreators)(AuthenticatedComponent);
 	}
+
+/***/ },
+/* 303 */
+/*!********************************************!*\
+  !*** ./client/app/components/messages.jsx ***!
+  \********************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.Messages = undefined;
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _react = __webpack_require__(/*! react */ 1);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactRedux = __webpack_require__(/*! react-redux */ 172);
+	
+	var _messages = __webpack_require__(/*! ../actions/messages */ 304);
+	
+	var actionCreators = _interopRequireWildcard(_messages);
+	
+	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var MessagesForm = function (_React$Component) {
+	  _inherits(MessagesForm, _React$Component);
+	
+	  function MessagesForm(props) {
+	    _classCallCheck(this, MessagesForm);
+	
+	    return _possibleConstructorReturn(this, (MessagesForm.__proto__ || Object.getPrototypeOf(MessagesForm)).call(this, props));
+	  }
+	
+	  _createClass(MessagesForm, [{
+	    key: 'render',
+	    value: function render() {
+	      var channel = this.props.channel;
+	      if (channel == null) {
+	        channel = "Please choose channel";
+	      }
+	      return _react2.default.createElement(
+	        'div',
+	        null,
+	        _react2.default.createElement(
+	          'p',
+	          null,
+	          channel
+	        )
+	      );
+	    }
+	  }]);
+	
+	  return MessagesForm;
+	}(_react2.default.Component);
+	
+	function mapStateToProps(state) {
+	  return {
+	    username: state.auth.getIn(["session", "username"])
+	  };
+	}
+	
+	var Messages = exports.Messages = (0, _reactRedux.connect)(mapStateToProps, actionCreators)(MessagesForm);
+
+/***/ },
+/* 304 */
+/*!****************************************!*\
+  !*** ./client/app/actions/messages.js ***!
+  \****************************************/
+/***/ function(module, exports) {
+
+	"use strict";
 
 /***/ }
 /******/ ]);

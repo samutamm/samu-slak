@@ -8,7 +8,7 @@ body{
 }
 
 #messages {
-  
+
 }
 #left{
   width: 33.33%;
@@ -20,7 +20,6 @@ body{
   width: 33.33%;
   width: calc(100% / 3);
   display: inline-block;
-  background-color: blue;
 }
 #right{
   width: 33.33%;
