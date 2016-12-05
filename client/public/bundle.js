@@ -83,21 +83,21 @@
 	
 	var _messagesLayout2 = _interopRequireDefault(_messagesLayout);
 	
-	var _home = __webpack_require__(/*! ./components/home.jsx */ 297);
+	var _home = __webpack_require__(/*! ./components/home.jsx */ 299);
 	
 	var _home2 = _interopRequireDefault(_home);
 	
-	var _login = __webpack_require__(/*! ./components/login.jsx */ 298);
+	var _login = __webpack_require__(/*! ./components/login.jsx */ 300);
 	
-	var _authReducer = __webpack_require__(/*! ./reducers/auth-reducer */ 300);
+	var _authReducer = __webpack_require__(/*! ./reducers/auth-reducer */ 302);
 	
 	var _authReducer2 = _interopRequireDefault(_authReducer);
 	
-	var _channelsReducer = __webpack_require__(/*! ./reducers/channels-reducer */ 301);
+	var _channelsReducer = __webpack_require__(/*! ./reducers/channels-reducer */ 303);
 	
 	var _channelsReducer2 = _interopRequireDefault(_channelsReducer);
 	
-	var _AuthenticatedComponent = __webpack_require__(/*! ./components/AuthenticatedComponent.jsx */ 302);
+	var _AuthenticatedComponent = __webpack_require__(/*! ./components/AuthenticatedComponent.jsx */ 304);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -30168,7 +30168,7 @@
 	
 	var _channels = __webpack_require__(/*! ../channels.jsx */ 269);
 	
-	var _messages = __webpack_require__(/*! ../messages.jsx */ 303);
+	var _messages = __webpack_require__(/*! ../messages.jsx */ 297);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -30301,6 +30301,21 @@
 	        { style: { color: 'red' } },
 	        this.props.channel
 	      );
+	      if (this.props.quitChannel === undefined) {
+	        return _react2.default.createElement(
+	          'tr',
+	          null,
+	          _react2.default.createElement(
+	            'td',
+	            null,
+	            _react2.default.createElement(
+	              'span',
+	              { onClick: this.handleClick },
+	              name
+	            )
+	          )
+	        );
+	      }
 	      return _react2.default.createElement(
 	        'tr',
 	        null,
@@ -30314,9 +30329,9 @@
 	          ),
 	          ' ',
 	          _react2.default.createElement(
-	            'span',
+	            'button',
 	            { onClick: this.quitChannel },
-	            'QUIT'
+	            'Quit'
 	          )
 	        )
 	      );
@@ -30496,7 +30511,7 @@
 	  }, {
 	    key: 'quitChannel',
 	    value: function quitChannel(channelName) {
-	      console.log("QUIT: " + channelName);
+	      this.props.quitUserFromChannel(channelName, this.props.username);
 	    }
 	  }, {
 	    key: 'render',
@@ -30523,8 +30538,7 @@
 	          { id: 'allChannelsBox' },
 	          _react2.default.createElement(FilterableChannelTable, { channels: allChannels,
 	            chooseChannel: this.clickPublicChannels,
-	            tableName: 'All channels',
-	            quitChannel: this.quitChannel })
+	            tableName: 'All channels' })
 	        ),
 	        _react2.default.createElement(
 	          'div',
@@ -30565,6 +30579,7 @@
 	});
 	exports.fetchChannels = fetchChannels;
 	exports.joinUserToChannel = joinUserToChannel;
+	exports.quitUserFromChannel = quitUserFromChannel;
 	exports.fetchUsersChannels = fetchUsersChannels;
 	exports.receiveChannels = receiveChannels;
 	
@@ -30613,10 +30628,9 @@
 	function fetchUsers(username) {
 	  return function (dispatch) {
 	    dispatch(request('isFetchingUsers'));
-	    _axios2.default.get('/channels', {
+	    _axios2.default.get('/channels/' + username, {
 	      params: {
-	        organization: organization,
-	        username: username
+	        organization: organization
 	      },
 	      method: 'get',
 	      baseURL: baseURL
@@ -30645,6 +30659,31 @@
 	      baseURL: baseURL
 	    }).then(function (response) {
 	      dispatch(joinedSuccess());
+	      dispatch(fetchUsersChannels(username));
+	    }).catch(function (error) {
+	      dispatch(receiveError(error));
+	    });
+	  };
+	}
+	
+	function quitChannel(channelName, username) {
+	  return function (dispatch) {
+	    dispatch(request('isQuitting'));
+	    (0, _axios2.default)({
+	      url: '/channels/quit',
+	      params: {
+	        organization: organization,
+	        channel: channelName,
+	        username: username
+	      },
+	      headers: {
+	        'Content-Type': 'text/plain'
+	      },
+	      method: 'post',
+	      baseURL: baseURL
+	    }).then(function (response) {
+	      dispatch(quittedSuccess());
+	      dispatch(fetchUsersChannels(username));
 	    }).catch(function (error) {
 	      dispatch(receiveError(error));
 	    });
@@ -30665,6 +30704,16 @@
 	  return function (dispatch, getState) {
 	    if (canFetch(getState().channels, 'isJoining')) {
 	      return dispatch(joinChannel(channelName, username));
+	    } else {
+	      return Promise.resolve();
+	    }
+	  };
+	}
+	
+	function quitUserFromChannel(channelName, username) {
+	  return function (dispatch, getState) {
+	    if (canFetch(getState().channels, 'isQuitting')) {
+	      return dispatch(quitChannel(channelName, username));
 	    } else {
 	      return Promise.resolve();
 	    }
@@ -30695,6 +30744,12 @@
 	function joinedSuccess() {
 	  return {
 	    type: 'SET_JOINED'
+	  };
+	}
+	
+	function quittedSuccess() {
+	  return {
+	    type: 'SET_QUITTED'
 	  };
 	}
 	
@@ -37250,6 +37305,90 @@
 
 /***/ },
 /* 297 */
+/*!********************************************!*\
+  !*** ./client/app/components/messages.jsx ***!
+  \********************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.Messages = undefined;
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _react = __webpack_require__(/*! react */ 1);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactRedux = __webpack_require__(/*! react-redux */ 172);
+	
+	var _messages = __webpack_require__(/*! ../actions/messages */ 298);
+	
+	var actionCreators = _interopRequireWildcard(_messages);
+	
+	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var MessagesForm = function (_React$Component) {
+	  _inherits(MessagesForm, _React$Component);
+	
+	  function MessagesForm(props) {
+	    _classCallCheck(this, MessagesForm);
+	
+	    return _possibleConstructorReturn(this, (MessagesForm.__proto__ || Object.getPrototypeOf(MessagesForm)).call(this, props));
+	  }
+	
+	  _createClass(MessagesForm, [{
+	    key: 'render',
+	    value: function render() {
+	      var channel = this.props.channel;
+	      if (channel == null) {
+	        channel = "Please choose channel";
+	      }
+	      return _react2.default.createElement(
+	        'div',
+	        null,
+	        _react2.default.createElement(
+	          'p',
+	          null,
+	          channel
+	        )
+	      );
+	    }
+	  }]);
+	
+	  return MessagesForm;
+	}(_react2.default.Component);
+	
+	function mapStateToProps(state) {
+	  return {
+	    username: state.auth.getIn(["session", "username"])
+	  };
+	}
+	
+	var Messages = exports.Messages = (0, _reactRedux.connect)(mapStateToProps, actionCreators)(MessagesForm);
+
+/***/ },
+/* 298 */
+/*!****************************************!*\
+  !*** ./client/app/actions/messages.js ***!
+  \****************************************/
+/***/ function(module, exports) {
+
+	"use strict";
+
+/***/ },
+/* 299 */
 /*!****************************************!*\
   !*** ./client/app/components/home.jsx ***!
   \****************************************/
@@ -37305,7 +37444,7 @@
 	exports.default = _class;
 
 /***/ },
-/* 298 */
+/* 300 */
 /*!*****************************************!*\
   !*** ./client/app/components/login.jsx ***!
   \*****************************************/
@@ -37326,7 +37465,7 @@
 	
 	var _reactRedux = __webpack_require__(/*! react-redux */ 172);
 	
-	var _auth = __webpack_require__(/*! ../actions/auth */ 299);
+	var _auth = __webpack_require__(/*! ../actions/auth */ 301);
 	
 	var actionCreators = _interopRequireWildcard(_auth);
 	
@@ -37431,7 +37570,7 @@
 	var LoginContainer = exports.LoginContainer = (0, _reactRedux.connect)(mapStateToProps, actionCreators)(LoginForm);
 
 /***/ },
-/* 299 */
+/* 301 */
 /*!************************************!*\
   !*** ./client/app/actions/auth.js ***!
   \************************************/
@@ -37569,7 +37708,7 @@
 	}
 
 /***/ },
-/* 300 */
+/* 302 */
 /*!*********************************************!*\
   !*** ./client/app/reducers/auth-reducer.js ***!
   \*********************************************/
@@ -37638,7 +37777,7 @@
 	}
 
 /***/ },
-/* 301 */
+/* 303 */
 /*!*************************************************!*\
   !*** ./client/app/reducers/channels-reducer.js ***!
   \*************************************************/
@@ -37662,11 +37801,14 @@
 	    case 'RECEIVE_ERROR':
 	      state = removeFetchingFlag(state, 'isJoining');
 	      state = removeFetchingFlag(state, 'isFetchingUsers');
+	      state = removeFetchingFlag(state, 'isQuitting');
 	      return removeFetchingFlag(state, 'isFetchingAll');
 	    case 'SET_JOINED':
 	      return removeFetchingFlag(state, 'isJoining');
 	    case 'SET_USERS_CHANNELS':
 	      return setFetched(state, action.channels, 'usersChannels', 'isFetchingUsers');
+	    case 'SET_QUITTED':
+	      return removeFetchingFlag(state, 'isQuitting');
 	
 	  }
 	  return state;
@@ -37691,6 +37833,8 @@
 	function setFetched(state, channels, tag, resourse) {
 	  var channelsList = channels.map(function (item) {
 	    return item.name;
+	  }).filter(function (i) {
+	    return i !== undefined;
 	  });
 	  var channelsAdded = state.setIn([tag], channelsList);
 	  return removeFetchingFlag(channelsAdded, resourse);
@@ -37701,7 +37845,7 @@
 	}
 
 /***/ },
-/* 302 */
+/* 304 */
 /*!**********************************************************!*\
   !*** ./client/app/components/AuthenticatedComponent.jsx ***!
   \**********************************************************/
@@ -37720,7 +37864,7 @@
 	
 	var _reactRedux = __webpack_require__(/*! react-redux */ 172);
 	
-	var _auth = __webpack_require__(/*! ../actions/auth */ 299);
+	var _auth = __webpack_require__(/*! ../actions/auth */ 301);
 	
 	var actionCreators = _interopRequireWildcard(_auth);
 	
@@ -37762,90 +37906,6 @@
 	
 	  return (0, _reactRedux.connect)(mapStateToProps, actionCreators)(AuthenticatedComponent);
 	}
-
-/***/ },
-/* 303 */
-/*!********************************************!*\
-  !*** ./client/app/components/messages.jsx ***!
-  \********************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	exports.Messages = undefined;
-	
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-	
-	var _react = __webpack_require__(/*! react */ 1);
-	
-	var _react2 = _interopRequireDefault(_react);
-	
-	var _reactRedux = __webpack_require__(/*! react-redux */ 172);
-	
-	var _messages = __webpack_require__(/*! ../actions/messages */ 304);
-	
-	var actionCreators = _interopRequireWildcard(_messages);
-	
-	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-	
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-	
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-	
-	var MessagesForm = function (_React$Component) {
-	  _inherits(MessagesForm, _React$Component);
-	
-	  function MessagesForm(props) {
-	    _classCallCheck(this, MessagesForm);
-	
-	    return _possibleConstructorReturn(this, (MessagesForm.__proto__ || Object.getPrototypeOf(MessagesForm)).call(this, props));
-	  }
-	
-	  _createClass(MessagesForm, [{
-	    key: 'render',
-	    value: function render() {
-	      var channel = this.props.channel;
-	      if (channel == null) {
-	        channel = "Please choose channel";
-	      }
-	      return _react2.default.createElement(
-	        'div',
-	        null,
-	        _react2.default.createElement(
-	          'p',
-	          null,
-	          channel
-	        )
-	      );
-	    }
-	  }]);
-	
-	  return MessagesForm;
-	}(_react2.default.Component);
-	
-	function mapStateToProps(state) {
-	  return {
-	    username: state.auth.getIn(["session", "username"])
-	  };
-	}
-	
-	var Messages = exports.Messages = (0, _reactRedux.connect)(mapStateToProps, actionCreators)(MessagesForm);
-
-/***/ },
-/* 304 */
-/*!****************************************!*\
-  !*** ./client/app/actions/messages.js ***!
-  \****************************************/
-/***/ function(module, exports) {
-
-	"use strict";
 
 /***/ }
 /******/ ]);

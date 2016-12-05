@@ -38,10 +38,9 @@ function fetch() {
 function fetchUsers(username) {
   return dispatch => {
     dispatch(request('isFetchingUsers'));
-    axios.get('/channels', {
+    axios.get('/channels/' + username, {
       params: {
         organization: organization,
-        username: username
       },
       method: 'get',
       baseURL: baseURL,
@@ -70,11 +69,37 @@ function joinChannel(channelName, username) {
         baseURL: baseURL
       }).then(function (response) {
       dispatch(joinedSuccess());
+      dispatch(fetchUsersChannels(username));
     }).catch(function (error) {
       dispatch(receiveError(error));
     });
   }
 }
+
+function quitChannel(channelName, username) {
+  return dispatch => {
+    dispatch(request('isQuitting'));
+    axios({
+        url: '/channels/quit',
+        params: {
+          organization: organization,
+          channel: channelName,
+          username: username
+        },
+        headers: {
+          'Content-Type':'text/plain'
+        },
+        method: 'post',
+        baseURL: baseURL
+      }).then(function (response) {
+        dispatch(quittedSuccess());
+        dispatch(fetchUsersChannels(username));
+    }).catch(function (error) {
+      dispatch(receiveError(error));
+    });
+  }
+}
+
 
 export function fetchChannels() {
   return (dispatch, getState) => {
@@ -90,6 +115,16 @@ export function joinUserToChannel(channelName, username) {
   return (dispatch, getState) => {
     if (canFetch(getState().channels, 'isJoining')) {
       return dispatch(joinChannel(channelName, username));
+    } else {
+      return Promise.resolve()
+    }
+  }
+}
+
+export function quitUserFromChannel(channelName, username) {
+  return (dispatch, getState) => {
+    if (canFetch(getState().channels, 'isQuitting')) {
+      return dispatch(quitChannel(channelName, username));
     } else {
       return Promise.resolve()
     }
@@ -120,6 +155,12 @@ export function receiveChannels(channels) {
 function joinedSuccess() {
   return {
     type: 'SET_JOINED'
+  };
+}
+
+function quittedSuccess() {
+  return {
+    type: 'SET_QUITTED'
   };
 }
 

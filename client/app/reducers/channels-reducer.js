@@ -17,7 +17,7 @@ function setFetchingFlag(state, resourse) {
 function setFetched(state, channels, tag, resourse) {
   const channelsList = channels.map(function(item){
     return item.name;
-  })
+  }).filter(function(i) { return i !== undefined;});
   const channelsAdded = state.setIn([tag], channelsList);
   return removeFetchingFlag(channelsAdded, resourse);
 }
@@ -35,11 +35,14 @@ export default function(state = initial(), action) {
     case 'RECEIVE_ERROR':
         state = removeFetchingFlag(state, 'isJoining');
         state = removeFetchingFlag(state, 'isFetchingUsers');
+        state = removeFetchingFlag(state, 'isQuitting');
         return removeFetchingFlag(state, 'isFetchingAll');
     case 'SET_JOINED':
         return removeFetchingFlag(state, 'isJoining');
     case 'SET_USERS_CHANNELS':
         return setFetched(state, action.channels, 'usersChannels', 'isFetchingUsers');
+    case 'SET_QUITTED':
+        return removeFetchingFlag(state, 'isQuitting');
 
   }
   return state;

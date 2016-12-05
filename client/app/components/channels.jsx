@@ -22,9 +22,16 @@ class ChannelRow extends React.Component {
       <span style={{color: 'red'}}>
         {this.props.channel}
       </span>;
+    if (this.props.quitChannel === undefined) {
+      return (
+        <tr>
+          <td><span onClick={this.handleClick}>{name}</span></td>
+        </tr>
+      );
+    }
     return (
       <tr>
-        <td><span onClick={this.handleClick}>{name}</span> <span onClick={this.quitChannel}>QUIT</span></td>
+        <td><span onClick={this.handleClick}>{name}</span> <button onClick={this.quitChannel}>Quit</button></td>
       </tr>
     );
   }
@@ -134,7 +141,7 @@ class ChannelForm extends React.Component{
     this.props.chooseChannel(newChannel);
   }
   quitChannel(channelName) {
-    console.log("QUIT: " + channelName);
+    this.props.quitUserFromChannel(channelName, this.props.username);
   }
   render() {
     const allChannels = this.props.channels;
@@ -150,8 +157,7 @@ class ChannelForm extends React.Component{
         <div id="allChannelsBox">
           <FilterableChannelTable channels={allChannels}
                                   chooseChannel={this.clickPublicChannels}
-                                  tableName="All channels"
-                                  quitChannel={this.quitChannel}/>
+                                  tableName="All channels"/>
         </div>
         <div id="ownChannelsBox">
           <FilterableChannelTable channels={usersOwnChannels}
