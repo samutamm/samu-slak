@@ -15,10 +15,11 @@ function setFetchingFlag(state, resourse) {
 }
 
 function setFetched(state, channels, tag, resourse) {
+  const channelsRemoved = state.setIn([tag], null);
   const channelsList = channels.map(function(item){
     return item.name;
   }).filter(function(i) { return i !== undefined;});
-  const channelsAdded = state.setIn([tag], channelsList);
+  const channelsAdded = channelsRemoved.setIn([tag], channelsList);
   return removeFetchingFlag(channelsAdded, resourse);
 }
 

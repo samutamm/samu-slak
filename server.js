@@ -6,7 +6,9 @@ if (!process.env.NODE_ENV) {
 }
 
 var express = require('./server/config/express')
-    fs = require('fs');
+    fs = require('fs'),
+    http = require('http'),
+    io = require('socket.io');
 
 var app = express();
 
@@ -17,8 +19,10 @@ app.get('*', (req, res) => {
   res.sendFile('client/index.html', { root: __dirname });
 });
 
-
-var server = app.listen(app.get('port'), function () {
+const httpServer = http.Server(app);
+const socketIO = io(httpServer);
+require('./server/app/controllers/chatRoom.js')(socketIO);
+var server = httpServer.listen(app.get('port'), function() {
   var host = server.address().address;
   var port = server.address().port;
   console.log('Server started at http://localhost:%s', port);

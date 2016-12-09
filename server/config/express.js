@@ -27,7 +27,6 @@ module.exports = function() {
   const staticPath = path.join(__dirname, './../../client/');
   app.use('/', express.static(staticPath));
 
-  require('../app/routes/hello.server.route')(app);
-  require('../app/routes/login.server.route')(app);
+
   return app;
 }

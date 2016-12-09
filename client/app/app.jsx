@@ -13,6 +13,7 @@ import Home from './components/home.jsx';
 import {LoginContainer} from './components/login.jsx';
 import authReducer from './reducers/auth-reducer';
 import channelsReducer from './reducers/channels-reducer';
+import messagesReducer from './reducers/messages-reducer';
 import {requireAuthentication} from './components/AuthenticatedComponent.jsx';
 
 
@@ -23,7 +24,8 @@ const routingMiddleware = routerMiddleware(browserHistory);
 const reducer = combineReducers({
   routing: routerReducer,
   auth: authReducer,
-  channels: channelsReducer
+  channels: channelsReducer,
+  messages: messagesReducer
 });
 
 const store = createStore(
