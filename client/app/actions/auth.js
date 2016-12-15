@@ -1,6 +1,7 @@
 import {Map} from 'immutable';
 import axios from 'axios';
 import { browserHistory } from 'react-router';
+import {AUTH_URL} from './../constants';
 
 function request() {
   return {
@@ -42,7 +43,7 @@ function sendAuthentication(username, password) {
     axios.get('/login', {
       url: "/login",
       method: 'get',
-      baseURL: "http://localhost:3030",
+      baseURL: AUTH_URL,
       auth: {
         username: username,
         password: password
@@ -64,7 +65,7 @@ function sendToken(token, role) {
     dispatch(request());
     axios.get('/checkToken', {
       url: "/checkToken",
-      baseURL: "http://localhost:3030",
+      baseURL: AUTH_URL,
       method: 'get',
       headers: {
         'Authorization': token
@@ -109,6 +110,5 @@ function logOut() {
 export function logoutAndRedirect() {
     return (dispatch, state) => {
         dispatch(logOut());
-        //appHistory.push('/login');
     }
 }

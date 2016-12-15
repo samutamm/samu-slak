@@ -37312,14 +37312,16 @@
 /*!*********************************!*\
   !*** ./client/app/constants.js ***!
   \*********************************/
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
-	"use strict";
+	/* WEBPACK VAR INJECTION */(function(process) {"use strict";
 	
 	module.exports = {
-	   ORGANIZATION: "samu", //Hard coded at the moment
-	   BASEURL: "http://localhost:8080"
+	   ORGANIZATION: process.env.ORGANIZATION || "samu", //Hard coded at the moment
+	   BASEURL: process.env.BASEURL || "http://localhost:8080",
+	   AUTH_URL: process.env.AUTH_URL || "http://localhost:3030"
 	};
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./~/process/browser.js */ 3)))
 
 /***/ },
 /* 298 */
@@ -46588,6 +46590,8 @@
 	
 	var _reactRouter = __webpack_require__(/*! react-router */ 209);
 	
+	var _constants = __webpack_require__(/*! ./../constants */ 297);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	function request() {
@@ -46630,7 +46634,7 @@
 	    _axios2.default.get('/login', {
 	      url: "/login",
 	      method: 'get',
-	      baseURL: "http://localhost:3030",
+	      baseURL: _constants.AUTH_URL,
 	      auth: {
 	        username: username,
 	        password: password
@@ -46652,7 +46656,7 @@
 	    dispatch(request());
 	    _axios2.default.get('/checkToken', {
 	      url: "/checkToken",
-	      baseURL: "http://localhost:3030",
+	      baseURL: _constants.AUTH_URL,
 	      method: 'get',
 	      headers: {
 	        'Authorization': token
@@ -46697,7 +46701,6 @@
 	function logoutAndRedirect() {
 	  return function (dispatch, state) {
 	    dispatch(logOut());
-	    //appHistory.push('/login');
 	  };
 	}
 

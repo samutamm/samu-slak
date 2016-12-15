@@ -1,5 +1,5 @@
 var axios = require('axios'),
-    messageRestApiUrl = "http://localhost:8080";
+    messageRestApiUrl = process.env.BASEURL || "http://localhost:8080";
 
 function sendMessagesToSocket(currentSocket, messagesToSend) {
   currentSocket.emit('server:messages', {
@@ -19,9 +19,7 @@ module.exports = function(io) {
     });
 
     socket.on('client:join', function(msg){
-      const username = msg.username;
       const channel = msg.channel;
-      const sessionId = msg.sessionId;
       const organization = msg.organization;
       socket.join(channel);
       axios.get('/messages', {
