@@ -83,25 +83,25 @@
 	
 	var _messagesLayout2 = _interopRequireDefault(_messagesLayout);
 	
-	var _home = __webpack_require__(/*! ./components/home.jsx */ 354);
+	var _home = __webpack_require__(/*! ./components/home.jsx */ 355);
 	
 	var _home2 = _interopRequireDefault(_home);
 	
-	var _login = __webpack_require__(/*! ./components/login.jsx */ 355);
+	var _login = __webpack_require__(/*! ./components/login.jsx */ 356);
 	
-	var _authReducer = __webpack_require__(/*! ./reducers/auth-reducer */ 357);
+	var _authReducer = __webpack_require__(/*! ./reducers/auth-reducer */ 358);
 	
 	var _authReducer2 = _interopRequireDefault(_authReducer);
 	
-	var _channelsReducer = __webpack_require__(/*! ./reducers/channels-reducer */ 358);
+	var _channelsReducer = __webpack_require__(/*! ./reducers/channels-reducer */ 359);
 	
 	var _channelsReducer2 = _interopRequireDefault(_channelsReducer);
 	
-	var _messagesReducer = __webpack_require__(/*! ./reducers/messages-reducer */ 359);
+	var _messagesReducer = __webpack_require__(/*! ./reducers/messages-reducer */ 360);
 	
 	var _messagesReducer2 = _interopRequireDefault(_messagesReducer);
 	
-	var _AuthenticatedComponent = __webpack_require__(/*! ./components/AuthenticatedComponent.jsx */ 360);
+	var _AuthenticatedComponent = __webpack_require__(/*! ./components/AuthenticatedComponent.jsx */ 361);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -30594,7 +30594,9 @@
 	
 	var _axios2 = _interopRequireDefault(_axios);
 	
-	var _constants = __webpack_require__(/*! ./../constants */ 297);
+	var _Config = __webpack_require__(/*! Config */ 297);
+	
+	var _Config2 = _interopRequireDefault(_Config);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -30617,10 +30619,10 @@
 	    dispatch(request('isFetchingAll'));
 	    _axios2.default.get('/channels', {
 	      params: {
-	        organization: _constants.ORGANIZATION
+	        organization: _Config2.default.ORGANIZATION
 	      },
 	      method: 'get',
-	      baseURL: _constants.BASEURL
+	      baseURL: _Config2.default.BASEURL
 	    }).then(function (response) {
 	      dispatch(receiveChannels(response.data));
 	    }).catch(function (error) {
@@ -30634,10 +30636,10 @@
 	    dispatch(request('isFetchingUsers'));
 	    _axios2.default.get('/channels/' + username, {
 	      params: {
-	        organization: _constants.ORGANIZATION
+	        organization: _Config2.default.ORGANIZATION
 	      },
 	      method: 'get',
-	      baseURL: _constants.BASEURL
+	      baseURL: _Config2.default.BASEURL
 	    }).then(function (response) {
 	      dispatch(receiveUsersChannels(response.data));
 	    }).catch(function (error) {
@@ -30652,7 +30654,7 @@
 	    (0, _axios2.default)({
 	      url: '/channels/join',
 	      params: {
-	        organization: _constants.ORGANIZATION,
+	        organization: _Config2.default.ORGANIZATION,
 	        channel: channelName,
 	        username: username
 	      },
@@ -30660,7 +30662,7 @@
 	        'Content-Type': 'text/plain'
 	      },
 	      method: 'post',
-	      baseURL: _constants.BASEURL
+	      baseURL: _Config2.default.BASEURL
 	    }).then(function (response) {
 	      dispatch(joinedSuccess());
 	      dispatch(fetchUsersChannels(username));
@@ -30676,7 +30678,7 @@
 	    (0, _axios2.default)({
 	      url: '/channels/quit',
 	      params: {
-	        organization: _constants.ORGANIZATION,
+	        organization: _Config2.default.ORGANIZATION,
 	        channel: channelName,
 	        username: username
 	      },
@@ -30684,7 +30686,7 @@
 	        'Content-Type': 'text/plain'
 	      },
 	      method: 'post',
-	      baseURL: _constants.BASEURL
+	      baseURL: _Config2.default.BASEURL
 	    }).then(function (response) {
 	      dispatch(quittedSuccess());
 	      dispatch(fetchUsersChannels(username));
@@ -37309,19 +37311,12 @@
 
 /***/ },
 /* 297 */
-/*!*********************************!*\
-  !*** ./client/app/constants.js ***!
-  \*********************************/
-/***/ function(module, exports, __webpack_require__) {
+/*!***************************************************************************************************************************!*\
+  !*** external "{\"ORGANIZATION\":\"samu\",\"BASEURL\":\"http://localhost:8080\",\"AUTH_URL\":\"http://localhost:3030\"}" ***!
+  \***************************************************************************************************************************/
+/***/ function(module, exports) {
 
-	/* WEBPACK VAR INJECTION */(function(process) {"use strict";
-	
-	module.exports = {
-	   ORGANIZATION: process.env.ORGANIZATION || "samu", //Hard coded at the moment
-	   BASEURL: process.env.BASEURL || "http://localhost:8080",
-	   AUTH_URL: process.env.AUTH_URL || "http://localhost:3030"
-	};
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./~/process/browser.js */ 3)))
+	module.exports = {"ORGANIZATION":"samu","BASEURL":"http://localhost:8080","AUTH_URL":"http://localhost:3030"};
 
 /***/ },
 /* 298 */
@@ -37553,7 +37548,7 @@
 	
 	var _socket3 = _interopRequireDefault(_socket2);
 	
-	var _constants = __webpack_require__(/*! ./../constants */ 297);
+	var _constants = __webpack_require__(/*! ./../constants */ 354);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -46385,6 +46380,22 @@
 
 /***/ },
 /* 354 */
+/*!*********************************!*\
+  !*** ./client/app/constants.js ***!
+  \*********************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(process) {"use strict";
+	
+	module.exports = {
+	   ORGANIZATION: process.env.ORGANIZATION || "samu", //Hard coded at the moment
+	   BASEURL: process.env.BASEURL || "http://localhost:8080",
+	   AUTH_URL: process.env.AUTH_URL || "http://localhost:3030"
+	};
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./~/process/browser.js */ 3)))
+
+/***/ },
+/* 355 */
 /*!****************************************!*\
   !*** ./client/app/components/home.jsx ***!
   \****************************************/
@@ -46440,7 +46451,7 @@
 	exports.default = _class;
 
 /***/ },
-/* 355 */
+/* 356 */
 /*!*****************************************!*\
   !*** ./client/app/components/login.jsx ***!
   \*****************************************/
@@ -46461,7 +46472,7 @@
 	
 	var _reactRedux = __webpack_require__(/*! react-redux */ 172);
 	
-	var _auth = __webpack_require__(/*! ../actions/auth */ 356);
+	var _auth = __webpack_require__(/*! ../actions/auth */ 357);
 	
 	var actionCreators = _interopRequireWildcard(_auth);
 	
@@ -46566,7 +46577,7 @@
 	var LoginContainer = exports.LoginContainer = (0, _reactRedux.connect)(mapStateToProps, actionCreators)(LoginForm);
 
 /***/ },
-/* 356 */
+/* 357 */
 /*!************************************!*\
   !*** ./client/app/actions/auth.js ***!
   \************************************/
@@ -46590,7 +46601,9 @@
 	
 	var _reactRouter = __webpack_require__(/*! react-router */ 209);
 	
-	var _constants = __webpack_require__(/*! ./../constants */ 297);
+	var _Config = __webpack_require__(/*! Config */ 297);
+	
+	var _Config2 = _interopRequireDefault(_Config);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -46634,7 +46647,7 @@
 	    _axios2.default.get('/login', {
 	      url: "/login",
 	      method: 'get',
-	      baseURL: _constants.AUTH_URL,
+	      baseURL: _Config2.default.AUTH_URL,
 	      auth: {
 	        username: username,
 	        password: password
@@ -46656,7 +46669,7 @@
 	    dispatch(request());
 	    _axios2.default.get('/checkToken', {
 	      url: "/checkToken",
-	      baseURL: _constants.AUTH_URL,
+	      baseURL: _Config2.default.AUTH_URL,
 	      method: 'get',
 	      headers: {
 	        'Authorization': token
@@ -46705,7 +46718,7 @@
 	}
 
 /***/ },
-/* 357 */
+/* 358 */
 /*!*********************************************!*\
   !*** ./client/app/reducers/auth-reducer.js ***!
   \*********************************************/
@@ -46774,7 +46787,7 @@
 	}
 
 /***/ },
-/* 358 */
+/* 359 */
 /*!*************************************************!*\
   !*** ./client/app/reducers/channels-reducer.js ***!
   \*************************************************/
@@ -46843,7 +46856,7 @@
 	}
 
 /***/ },
-/* 359 */
+/* 360 */
 /*!*************************************************!*\
   !*** ./client/app/reducers/messages-reducer.js ***!
   \*************************************************/
@@ -46905,7 +46918,7 @@
 	}
 
 /***/ },
-/* 360 */
+/* 361 */
 /*!**********************************************************!*\
   !*** ./client/app/components/AuthenticatedComponent.jsx ***!
   \**********************************************************/
@@ -46924,7 +46937,7 @@
 	
 	var _reactRedux = __webpack_require__(/*! react-redux */ 172);
 	
-	var _auth = __webpack_require__(/*! ../actions/auth */ 356);
+	var _auth = __webpack_require__(/*! ../actions/auth */ 357);
 	
 	var actionCreators = _interopRequireWildcard(_auth);
 	

@@ -1,7 +1,7 @@
 import {Map} from 'immutable';
 import axios from 'axios';
 import { browserHistory } from 'react-router';
-import {AUTH_URL} from './../constants';
+import Config from 'Config';
 
 function request() {
   return {
@@ -43,7 +43,7 @@ function sendAuthentication(username, password) {
     axios.get('/login', {
       url: "/login",
       method: 'get',
-      baseURL: AUTH_URL,
+      baseURL: Config.AUTH_URL,
       auth: {
         username: username,
         password: password
@@ -65,7 +65,7 @@ function sendToken(token, role) {
     dispatch(request());
     axios.get('/checkToken', {
       url: "/checkToken",
-      baseURL: AUTH_URL,
+      baseURL: Config.AUTH_URL,
       method: 'get',
       headers: {
         'Authorization': token

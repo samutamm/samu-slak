@@ -1,6 +1,6 @@
 import {Map} from 'immutable';
 import axios from 'axios';
-import {ORGANIZATION, BASEURL} from './../constants';
+import Config from 'Config';
 
 function request(resourse) {
   return {
@@ -21,10 +21,10 @@ function fetch() {
     dispatch(request('isFetchingAll'));
     axios.get('/channels', {
       params: {
-        organization: ORGANIZATION
+        organization: Config.ORGANIZATION
       },
       method: 'get',
-      baseURL: BASEURL,
+      baseURL: Config.BASEURL,
     }).then(function (response) {
       dispatch(receiveChannels(response.data));
     }).catch(function (error) {
@@ -38,10 +38,10 @@ function fetchUsers(username) {
     dispatch(request('isFetchingUsers'));
     axios.get('/channels/' + username, {
       params: {
-        organization: ORGANIZATION,
+        organization: Config.ORGANIZATION,
       },
       method: 'get',
-      baseURL: BASEURL,
+      baseURL: Config.BASEURL,
     }).then(function (response) {
       dispatch(receiveUsersChannels(response.data));
     }).catch(function (error) {
@@ -56,7 +56,7 @@ function joinChannel(channelName, username) {
     axios({
         url: '/channels/join',
         params: {
-          organization: ORGANIZATION,
+          organization: Config.ORGANIZATION,
           channel: channelName,
           username: username
         },
@@ -64,7 +64,7 @@ function joinChannel(channelName, username) {
           'Content-Type':'text/plain'
         },
         method: 'post',
-        baseURL: BASEURL
+        baseURL: Config.BASEURL
       }).then(function (response) {
       dispatch(joinedSuccess());
       dispatch(fetchUsersChannels(username));
@@ -80,7 +80,7 @@ function quitChannel(channelName, username) {
     axios({
         url: '/channels/quit',
         params: {
-          organization: ORGANIZATION,
+          organization: Config.ORGANIZATION,
           channel: channelName,
           username: username
         },
@@ -88,7 +88,7 @@ function quitChannel(channelName, username) {
           'Content-Type':'text/plain'
         },
         method: 'post',
-        baseURL: BASEURL
+        baseURL: Config.BASEURL
       }).then(function (response) {
         dispatch(quittedSuccess());
         dispatch(fetchUsersChannels(username));
