@@ -1,7 +1,4 @@
 module.exports = {
-   AUTH_SET_TOKEN: 'auth/SET_TOKEN',
-   AUTH_DISCARD_TOKEN: 'auth/DISCARD_TOKEN',
-   AUTH_SET_USER: 'auth/SET_USER',
-   USER_LOGGED_IN: 'user/LOGGED_IN',
-   USER_LOGGED_OUT: 'user/LOGGED_OUT'
+   ORGANIZATION: "samu", //Hard coded at the moment
+   BASEURL: "http://localhost:8080"
 };

@@ -10,7 +10,7 @@ class MessageRow extends React.Component {
     const message = this.props.message;
     return (
       <tr>
-        <td><span>{message}</span></td>
+        <td><span>{message.sender} : {message.text}</span></td>
       </tr>
     );
   }
@@ -19,9 +19,9 @@ class MessageRow extends React.Component {
 class MessageTable extends React.Component{
   render() {
     var rows = [];
-    this.props.messages.forEach((message) => {
+    this.props.messages.forEach((message,i) => {
       rows.push(<MessageRow message={message}
-                            key={message} />);
+                            key={i} />);
     });
     return (
       <table>
@@ -76,7 +76,7 @@ class MessagesForm extends React.Component{
       );
     }
     this.props.connectUserToChannel(channel, this.props.username);
-    const messages = ["eka","toka", "golg"];
+    var messages = this.props.messages;
     return (
       <div>
         <p>{channel}</p>
@@ -90,6 +90,7 @@ class MessagesForm extends React.Component{
 function mapStateToProps(state) {
   return {
     username: state.auth.getIn(["session","username"]),
+    messages: state.messages.getIn(['messages'])
   };
 }
 

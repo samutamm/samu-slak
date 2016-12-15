@@ -1,3 +1,11 @@
+var axios = require('axios'),
+    messageRestApiUrl = "http://localhost:8080";
+
+function sendMessagesToSocket(currentSocket, messagesToSend) {
+  currentSocket.emit('server:messages', {
+    messages: messagesToSend
+  });
+}
 
 module.exports = function(io) {
   var clients = [];
@@ -14,10 +22,19 @@ module.exports = function(io) {
       const username = msg.username;
       const channel = msg.channel;
       const sessionId = msg.sessionId;
+      const organization = msg.organization;
       socket.join(channel);
-      //fetch messages and send to client
-      socket.emit('server:messages', {
-        messages: ['molo','kolo']
+      axios.get('/messages', {
+        params: {
+          organization: organization,
+          channel: channel
+        },
+        method: 'get',
+        baseURL: messageRestApiUrl,
+      }).then(function (response) {
+        sendMessagesToSocket(socket, response.data);
+      }).catch(function (error) {
+        console.log(error);
       });
     });
 
