@@ -37446,7 +37446,7 @@
 	    key: 'handleSubmit',
 	    value: function handleSubmit(event) {
 	      event.preventDefault();
-	      console.log(this.state.value);
+	      this.props.newMessage(this.state.value, this.props.channel);
 	    }
 	  }, {
 	    key: 'render',
@@ -37474,10 +37474,18 @@
 	  function MessagesForm(props) {
 	    _classCallCheck(this, MessagesForm);
 	
-	    return _possibleConstructorReturn(this, (MessagesForm.__proto__ || Object.getPrototypeOf(MessagesForm)).call(this, props));
+	    var _this4 = _possibleConstructorReturn(this, (MessagesForm.__proto__ || Object.getPrototypeOf(MessagesForm)).call(this, props));
+	
+	    _this4.newMessage = _this4.newMessage.bind(_this4);
+	    return _this4;
 	  }
 	
 	  _createClass(MessagesForm, [{
+	    key: 'newMessage',
+	    value: function newMessage(message, channel) {
+	      this.props.sendMessageToChannel(message, channel, this.props.username);
+	    }
+	  }, {
 	    key: 'render',
 	    value: function render() {
 	      var channel = this.props.channel;
@@ -37503,7 +37511,7 @@
 	          channel
 	        ),
 	        _react2.default.createElement(MessageTable, { messages: messages }),
-	        _react2.default.createElement(NewMessageForm, null)
+	        _react2.default.createElement(NewMessageForm, { newMessage: this.newMessage, channel: channel })
 	      );
 	    }
 	  }]);
@@ -37533,14 +37541,15 @@
 	  value: true
 	});
 	exports.connectUserToChannel = connectUserToChannel;
+	exports.sendMessageToChannel = sendMessageToChannel;
 	
 	var _axios = __webpack_require__(/*! axios */ 272);
 	
 	var _axios2 = _interopRequireDefault(_axios);
 	
-	var _socket = __webpack_require__(/*! socket.io-client */ 300);
+	var _socket2 = __webpack_require__(/*! socket.io-client */ 300);
 	
-	var _socket2 = _interopRequireDefault(_socket);
+	var _socket3 = _interopRequireDefault(_socket2);
 	
 	var _constants = __webpack_require__(/*! ./../constants */ 297);
 	
@@ -37550,7 +37559,7 @@
 	
 	function connectChannel(channelName, username) {
 	  return function (dispatch) {
-	    socket = (0, _socket2.default)('http://localhost:3000');
+	    socket = (0, _socket3.default)('http://localhost:3000');
 	    socket.on('server:connected', function (sessionId) {
 	      dispatch(connectedSuccess(sessionId, channelName));
 	      socket.emit('client:join', {
@@ -37562,7 +37571,7 @@
 	    socket.on('server:messages', function (msg) {
 	      dispatch(receivedMessages(msg.messages));
 	    });
-	    dispatch(connectionSent());
+	    dispatch(connectionSent(socket));
 	  };
 	}
 	
@@ -37584,15 +37593,38 @@
 	  };
 	}
 	
+	function sendMessageToChannel(message, channelName, username) {
+	  return function (dispatch, getState) {
+	    if (!canConnect(getState().messages, 'isConnected')) {
+	      var _socket = getState().messages.getIn(["socket"]);
+	      return dispatch(sendMessage(_socket, message, channelName, username));
+	    } else {
+	      return Promise.resolve();
+	    }
+	  };
+	}
+	
+	function sendMessage(socket, message, channelName, username) {
+	  return function (dispatch) {
+	    socket.emit('client:newMessage', {
+	      message: message,
+	      channelName: channelName,
+	      username: username,
+	      organization: _constants.ORGANIZATION
+	    });
+	  };
+	}
+	
 	function deconnectOldChannel() {
 	  return {
 	    type: 'DECONNECT_OLD_CHANNEL'
 	  };
 	}
 	
-	function connectionSent() {
+	function connectionSent(socket) {
 	  return {
-	    type: 'CONNECTION_SENT'
+	    type: 'CONNECTION_SENT',
+	    socket: socket
 	  };
 	}
 	
@@ -46826,7 +46858,7 @@
 	
 	  switch (action.type) {
 	    case 'CONNECTION_SENT':
-	      return state;
+	      return setSocket(state, action.socket);
 	    case 'CONNECTED_SUCCESS':
 	      return setSessionId(state, action.channel, action.sessionId);
 	    case 'RECEIVED_MESSAGES':
@@ -46844,7 +46876,8 @@
 	    isConnected: false,
 	    channel: '',
 	    sessionId: undefined,
-	    messages: []
+	    messages: [],
+	    socket: undefined
 	  });
 	}
 	
@@ -46857,6 +46890,10 @@
 	function setMessages(state, messages) {
 	  var connected = state.setIn(["isConnected"], true);
 	  return connected.setIn(["messages"], messages);
+	}
+	
+	function setSocket(state, socket) {
+	  return state.setIn(["socket"], socket);
 	}
 	
 	function cleanState(state) {

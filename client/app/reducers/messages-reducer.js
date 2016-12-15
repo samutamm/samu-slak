@@ -5,7 +5,8 @@ function initial() {
     isConnected: false,
     channel: '',
     sessionId: undefined,
-    messages: []
+    messages: [],
+    socket: undefined
   });
 }
 
@@ -20,6 +21,10 @@ function setMessages(state, messages) {
   return connected.setIn(["messages"], messages);
 }
 
+function setSocket(state, socket) {
+  return state.setIn(["socket"], socket);
+}
+
 function cleanState(state) {
   const sessionId = state.getIn(['sessionId']);
   return initial().setIn(['sessionId'], sessionId);
@@ -28,7 +33,7 @@ function cleanState(state) {
 export default function(state = initial(), action) {
   switch (action.type) {
     case 'CONNECTION_SENT':
-      return state;
+      return setSocket(state, action.socket);
     case 'CONNECTED_SUCCESS':
       return setSessionId(state, action.channel, action.sessionId);
     case 'RECEIVED_MESSAGES':

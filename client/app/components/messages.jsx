@@ -45,7 +45,7 @@ class NewMessageForm extends React.Component {
 
   handleSubmit(event) {
     event.preventDefault();
-    console.log(this.state.value);
+    this.props.newMessage(this.state.value, this.props.channel);
   }
 
   render() {
@@ -64,6 +64,11 @@ class NewMessageForm extends React.Component {
 class MessagesForm extends React.Component{
   constructor(props) {
     super(props);
+    this.newMessage = this.newMessage.bind(this);
+  }
+
+  newMessage(message, channel) {
+    this.props.sendMessageToChannel(message, channel, this.props.username);
   }
 
   render() {
@@ -81,7 +86,7 @@ class MessagesForm extends React.Component{
       <div>
         <p>{channel}</p>
         <MessageTable messages={messages} />
-        <NewMessageForm />
+        <NewMessageForm newMessage={this.newMessage} channel={channel}/>
       </div>
     );
   }

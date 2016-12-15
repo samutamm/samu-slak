@@ -1,7 +1,7 @@
 import axios from 'axios';
 import io from 'socket.io-client';
 import {ORGANIZATION, BASEURL} from './../constants';
-let socket = undefined;
+var socket = undefined;
 
 function connectChannel(channelName, username) {
   return dispatch => {
@@ -17,7 +17,7 @@ function connectChannel(channelName, username) {
     socket.on('server:messages', function(msg) {
       dispatch(receivedMessages(msg.messages));
     });
-    dispatch(connectionSent());
+    dispatch(connectionSent(socket));
   }
 }
 
@@ -39,15 +39,38 @@ export function connectUserToChannel(channelName, username) {
   }
 }
 
+export function sendMessageToChannel(message, channelName, username) {
+  return (dispatch, getState) => {
+    if (!canConnect(getState().messages, 'isConnected')) {
+      const socket = getState().messages.getIn(["socket"]);
+      return dispatch(sendMessage(socket, message, channelName, username));
+    } else {
+      return Promise.resolve()
+    }
+  }
+}
+
+function sendMessage(socket, message, channelName, username) {
+  return dispatch => {
+    socket.emit('client:newMessage', {
+      message: message,
+      channelName: channelName,
+      username: username,
+      organization: ORGANIZATION
+    })
+  }
+}
+
 function deconnectOldChannel() {
   return {
     type: 'DECONNECT_OLD_CHANNEL'
   }
 }
 
-function connectionSent() {
+function connectionSent(socket) {
   return {
-    type: 'CONNECTION_SENT'
+    type: 'CONNECTION_SENT',
+    socket: socket
   };
 }
 

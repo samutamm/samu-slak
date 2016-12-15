@@ -38,6 +38,27 @@ module.exports = function(io) {
       });
     });
 
+    socket.on('client:newMessage', function(msg) {
+      axios({
+          url: '/messages/new',
+          params: {
+            organization: msg.organization,
+            channel: msg.channelName,
+            message: msg.message,
+            sender: msg.username
+          },
+          headers: {
+            'Content-Type':'text/plain'
+          },
+          method: 'post',
+          baseURL: messageRestApiUrl
+        }).then(function (response) {
+          sendMessagesToSocket(io.to(response.data.channel), response.data.messages);
+      }).catch(function (error) {
+        console.log(error);
+      });
+    });
+
     socket.on('disconnect', function(){
       var index = clients.indexOf(socket);
         if (index != -1) {
