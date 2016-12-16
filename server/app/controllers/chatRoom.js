@@ -1,5 +1,5 @@
 var axios = require('axios'),
-    messageRestApiUrl = process.env.BASEURL || "http://localhost:8080";
+    Config = require('Config');
 
 function sendMessagesToSocket(currentSocket, messagesToSend) {
   currentSocket.emit('server:messages', {
@@ -28,7 +28,7 @@ module.exports = function(io) {
           channel: channel
         },
         method: 'get',
-        baseURL: messageRestApiUrl,
+        baseURL: Config.BASEURL
       }).then(function (response) {
         sendMessagesToSocket(socket, response.data);
       }).catch(function (error) {
@@ -49,7 +49,7 @@ module.exports = function(io) {
             'Content-Type':'text/plain'
           },
           method: 'post',
-          baseURL: messageRestApiUrl
+          baseURL: Config.BASEURL
         }).then(function (response) {
           sendMessagesToSocket(io.to(response.data.channel), response.data.messages);
       }).catch(function (error) {
