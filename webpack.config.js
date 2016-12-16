@@ -22,8 +22,8 @@ var config = {
   externals: {
     'Config': JSON.stringify({
       ORGANIZATION: process.env.ORGANIZATION || "samu", //Hard coded at the moment
-      BASEURL: process.env.BASEURL || "http://localhost:8080",
-      AUTH_URL: process.env.AUTH_URL || "http://localhost:3030"
+      BASEURL: process.env.BASEURL || "https://tranquil-scrubland-57034.herokuapp.com/",
+      AUTH_URL: process.env.AUTH_URL || "https://person-api.herokuapp.com/"
     })
   }
 };

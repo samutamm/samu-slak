@@ -37548,7 +37548,9 @@
 	
 	var _socket3 = _interopRequireDefault(_socket2);
 	
-	var _constants = __webpack_require__(/*! ./../constants */ 354);
+	var _Config = __webpack_require__(/*! Config */ 297);
+	
+	var _Config2 = _interopRequireDefault(_Config);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -37556,13 +37558,13 @@
 	
 	function connectChannel(channelName, username) {
 	  return function (dispatch) {
-	    socket = (0, _socket3.default)('http://localhost:3000');
+	    socket = (0, _socket3.default)('https://samu-slak.herokuapp.com/');
 	    socket.on('server:connected', function (sessionId) {
 	      dispatch(connectedSuccess(sessionId, channelName));
 	      socket.emit('client:join', {
 	        username: username,
 	        channel: channelName,
-	        organization: _constants.ORGANIZATION
+	        organization: _Config2.default.ORGANIZATION
 	      });
 	    });
 	    socket.on('server:messages', function (msg) {
@@ -37607,7 +37609,7 @@
 	      message: message,
 	      channelName: channelName,
 	      username: username,
-	      organization: _constants.ORGANIZATION
+	      organization: _Config2.default.ORGANIZATION
 	    });
 	  };
 	}
@@ -46379,22 +46381,7 @@
 
 
 /***/ },
-/* 354 */
-/*!*********************************!*\
-  !*** ./client/app/constants.js ***!
-  \*********************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	/* WEBPACK VAR INJECTION */(function(process) {"use strict";
-	
-	module.exports = {
-	   ORGANIZATION: process.env.ORGANIZATION || "samu", //Hard coded at the moment
-	   BASEURL: process.env.BASEURL || "http://localhost:8080",
-	   AUTH_URL: process.env.AUTH_URL || "http://localhost:3030"
-	};
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./~/process/browser.js */ 3)))
-
-/***/ },
+/* 354 */,
 /* 355 */
 /*!****************************************!*\
   !*** ./client/app/components/home.jsx ***!

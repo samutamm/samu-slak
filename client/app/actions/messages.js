@@ -1,17 +1,17 @@
 import axios from 'axios';
 import io from 'socket.io-client';
-import {ORGANIZATION, BASEURL} from './../constants';
+import Config from 'Config';
 var socket = undefined;
 
 function connectChannel(channelName, username) {
   return dispatch => {
-    socket = io('http://localhost:3000');
+    socket = io('https://samu-slak.herokuapp.com/');
     socket.on('server:connected', function(sessionId) {
       dispatch(connectedSuccess(sessionId, channelName));
       socket.emit('client:join', {
         username: username,
         channel: channelName,
-        organization: ORGANIZATION
+        organization: Config.ORGANIZATION
       });
     });
     socket.on('server:messages', function(msg) {
@@ -56,7 +56,7 @@ function sendMessage(socket, message, channelName, username) {
       message: message,
       channelName: channelName,
       username: username,
-      organization: ORGANIZATION
+      organization: Config.ORGANIZATION
     })
   }
 }
