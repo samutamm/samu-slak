@@ -1,5 +1,5 @@
 var axios = require('axios'),
-    Config = require('Config');
+    BASEURL = "https://tranquil-scrubland-57034.herokuapp.com/";
 
 function sendMessagesToSocket(currentSocket, messagesToSend) {
   currentSocket.emit('server:messages', {
@@ -28,7 +28,7 @@ module.exports = function(io) {
           channel: channel
         },
         method: 'get',
-        baseURL: Config.BASEURL
+        baseURL: BASEURL
       }).then(function (response) {
         sendMessagesToSocket(socket, response.data);
       }).catch(function (error) {
@@ -49,7 +49,7 @@ module.exports = function(io) {
             'Content-Type':'text/plain'
           },
           method: 'post',
-          baseURL: Config.BASEURL
+          baseURL: BASEURL
         }).then(function (response) {
           sendMessagesToSocket(io.to(response.data.channel), response.data.messages);
       }).catch(function (error) {
