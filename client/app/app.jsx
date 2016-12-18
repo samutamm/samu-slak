@@ -4,12 +4,11 @@ import { Provider } from 'react-redux';
 import thunkMiddleware from 'redux-thunk';
 import createLogger from 'redux-logger';
 import { createStore, combineReducers, applyMiddleware, compose } from 'redux';
-import { Router, Route, browserHistory, IndexRoute } from 'react-router';
+import { Router, Route, browserHistory, IndexRoute, Redirect } from 'react-router';
 import { routerReducer, syncHistoryWithStore, routerActions, routerMiddleware } from 'react-router-redux';
 
 import MainLayout from './components/layouts/main-layout.jsx';
 import MessagesLayout from './components/layouts/messages-layout.jsx';
-import Home from './components/home.jsx';
 import {LoginContainer} from './components/login.jsx';
 import authReducer from './reducers/auth-reducer';
 import channelsReducer from './reducers/channels-reducer';
@@ -43,7 +42,7 @@ render(
   <Provider store={store}>
     <Router history={history}>
       <Route component={MainLayout}>
-        <Route path="/" component={requireAuthentication(Home)} />
+        <Redirect from="/" to="messages"/>
         <Route path="/login" component={LoginContainer} />
       </Route>
       <Route path="/messages" component={requireAuthentication(MessagesLayout)} />

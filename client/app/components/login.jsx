@@ -32,8 +32,8 @@ class LoginForm extends React.Component{
           </ul>
           <button type="submit"
                   onClick={this.handleLogin}>Log in</button>
-          <Link to={'/register'}>or register as a client here</Link>
         </form>
+        <p>At the moment registration is not possible (on TODO)</p>
         <p>{this.props.message}</p>
       </div>
     );

@@ -83,25 +83,21 @@
 	
 	var _messagesLayout2 = _interopRequireDefault(_messagesLayout);
 	
-	var _home = __webpack_require__(/*! ./components/home.jsx */ 355);
+	var _login = __webpack_require__(/*! ./components/login.jsx */ 354);
 	
-	var _home2 = _interopRequireDefault(_home);
-	
-	var _login = __webpack_require__(/*! ./components/login.jsx */ 356);
-	
-	var _authReducer = __webpack_require__(/*! ./reducers/auth-reducer */ 358);
+	var _authReducer = __webpack_require__(/*! ./reducers/auth-reducer */ 356);
 	
 	var _authReducer2 = _interopRequireDefault(_authReducer);
 	
-	var _channelsReducer = __webpack_require__(/*! ./reducers/channels-reducer */ 359);
+	var _channelsReducer = __webpack_require__(/*! ./reducers/channels-reducer */ 357);
 	
 	var _channelsReducer2 = _interopRequireDefault(_channelsReducer);
 	
-	var _messagesReducer = __webpack_require__(/*! ./reducers/messages-reducer */ 360);
+	var _messagesReducer = __webpack_require__(/*! ./reducers/messages-reducer */ 358);
 	
 	var _messagesReducer2 = _interopRequireDefault(_messagesReducer);
 	
-	var _AuthenticatedComponent = __webpack_require__(/*! ./components/AuthenticatedComponent.jsx */ 361);
+	var _AuthenticatedComponent = __webpack_require__(/*! ./components/AuthenticatedComponent.jsx */ 359);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -129,7 +125,7 @@
 	    _react2.default.createElement(
 	      _reactRouter.Route,
 	      { component: _mainLayout2.default },
-	      _react2.default.createElement(_reactRouter.Route, { path: '/', component: (0, _AuthenticatedComponent.requireAuthentication)(_home2.default) }),
+	      _react2.default.createElement(_reactRouter.Redirect, { from: '/', to: 'messages' }),
 	      _react2.default.createElement(_reactRouter.Route, { path: '/login', component: _login.LoginContainer })
 	    ),
 	    _react2.default.createElement(_reactRouter.Route, { path: '/messages', component: (0, _AuthenticatedComponent.requireAuthentication)(_messagesLayout2.default) })
@@ -30219,10 +30215,9 @@
 	        ),
 	        _react2.default.createElement(
 	          'div',
-	          { id: 'center' },
+	          { id: 'right' },
 	          _react2.default.createElement(_messages.Messages, { channel: this.state.channel })
-	        ),
-	        _react2.default.createElement('div', { id: 'right' })
+	        )
 	      );
 	    }
 	  }]);
@@ -37367,6 +37362,7 @@
 	    key: 'render',
 	    value: function render() {
 	      var message = this.props.message;
+	      var middleChar = message.sender !== '' ? ":" : "";
 	      return _react2.default.createElement(
 	        'tr',
 	        null,
@@ -37377,7 +37373,9 @@
 	            'span',
 	            null,
 	            message.sender,
-	            ' : ',
+	            ' ',
+	            middleChar,
+	            ' ',
 	            message.text
 	          )
 	        )
@@ -37402,16 +37400,20 @@
 	    value: function render() {
 	      var rows = [];
 	      this.props.messages.forEach(function (message, i) {
-	        rows.push(_react2.default.createElement(MessageRow, { message: message,
+	        rows.unshift(_react2.default.createElement(MessageRow, { message: message,
 	          key: i }));
 	      });
 	      return _react2.default.createElement(
-	        'table',
-	        null,
+	        'div',
+	        { id: 'messagesDiv' },
 	        _react2.default.createElement(
-	          'tbody',
-	          null,
-	          rows
+	          'table',
+	          { id: 'messagesTable' },
+	          _react2.default.createElement(
+	            'tbody',
+	            null,
+	            rows
+	          )
 	        )
 	      );
 	    }
@@ -37443,7 +37445,9 @@
 	    key: 'handleSubmit',
 	    value: function handleSubmit(event) {
 	      event.preventDefault();
-	      this.props.newMessage(this.state.value, this.props.channel);
+	      var message = this.state.value;
+	      this.props.newMessage(message, this.props.channel);
+	      this.state.value = "";
 	    }
 	  }, {
 	    key: 'render',
@@ -37457,7 +37461,7 @@
 	          'Message:',
 	          _react2.default.createElement('input', { type: 'text', value: this.state.value, onChange: this.handleChange })
 	        ),
-	        _react2.default.createElement('input', { type: 'submit', value: 'Submit' })
+	        _react2.default.createElement('input', { type: 'submit', value: 'Send' })
 	      );
 	    }
 	  }]);
@@ -37501,14 +37505,14 @@
 	      var messages = this.props.messages;
 	      return _react2.default.createElement(
 	        'div',
-	        null,
+	        { id: 'messageWrap' },
 	        _react2.default.createElement(
 	          'p',
-	          null,
+	          { id: 'channelName' },
 	          channel
 	        ),
 	        _react2.default.createElement(MessageTable, { messages: messages }),
-	        _react2.default.createElement(NewMessageForm, { newMessage: this.newMessage, channel: channel })
+	        _react2.default.createElement(NewMessageForm, { id: 'messageForm', newMessage: this.newMessage, channel: channel })
 	      );
 	    }
 	  }]);
@@ -46381,64 +46385,7 @@
 
 
 /***/ },
-/* 354 */,
-/* 355 */
-/*!****************************************!*\
-  !*** ./client/app/components/home.jsx ***!
-  \****************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-	
-	var _react = __webpack_require__(/*! react */ 1);
-	
-	var _react2 = _interopRequireDefault(_react);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-	
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-	
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-	
-	var _class = function (_React$Component) {
-	  _inherits(_class, _React$Component);
-	
-	  function _class() {
-	    _classCallCheck(this, _class);
-	
-	    return _possibleConstructorReturn(this, (_class.__proto__ || Object.getPrototypeOf(_class)).apply(this, arguments));
-	  }
-	
-	  _createClass(_class, [{
-	    key: 'render',
-	    value: function render() {
-	      return _react2.default.createElement(
-	        'div',
-	        null,
-	        _react2.default.createElement(
-	          'p',
-	          null,
-	          'Bienvenue \xE0 App!'
-	        )
-	      );
-	    }
-	  }]);
-	
-	  return _class;
-	}(_react2.default.Component);
-	
-	exports.default = _class;
-
-/***/ },
-/* 356 */
+/* 354 */
 /*!*****************************************!*\
   !*** ./client/app/components/login.jsx ***!
   \*****************************************/
@@ -46459,7 +46406,7 @@
 	
 	var _reactRedux = __webpack_require__(/*! react-redux */ 172);
 	
-	var _auth = __webpack_require__(/*! ../actions/auth */ 357);
+	var _auth = __webpack_require__(/*! ../actions/auth */ 355);
 	
 	var actionCreators = _interopRequireWildcard(_auth);
 	
@@ -46534,12 +46481,12 @@
 	            { type: 'submit',
 	              onClick: this.handleLogin },
 	            'Log in'
-	          ),
-	          _react2.default.createElement(
-	            _reactRouter.Link,
-	            { to: '/register' },
-	            'or register as a client here'
 	          )
+	        ),
+	        _react2.default.createElement(
+	          'p',
+	          null,
+	          'At the moment registration is not possible (on TODO)'
 	        ),
 	        _react2.default.createElement(
 	          'p',
@@ -46564,7 +46511,7 @@
 	var LoginContainer = exports.LoginContainer = (0, _reactRedux.connect)(mapStateToProps, actionCreators)(LoginForm);
 
 /***/ },
-/* 357 */
+/* 355 */
 /*!************************************!*\
   !*** ./client/app/actions/auth.js ***!
   \************************************/
@@ -46705,7 +46652,7 @@
 	}
 
 /***/ },
-/* 358 */
+/* 356 */
 /*!*********************************************!*\
   !*** ./client/app/reducers/auth-reducer.js ***!
   \*********************************************/
@@ -46774,7 +46721,7 @@
 	}
 
 /***/ },
-/* 359 */
+/* 357 */
 /*!*************************************************!*\
   !*** ./client/app/reducers/channels-reducer.js ***!
   \*************************************************/
@@ -46843,7 +46790,7 @@
 	}
 
 /***/ },
-/* 360 */
+/* 358 */
 /*!*************************************************!*\
   !*** ./client/app/reducers/messages-reducer.js ***!
   \*************************************************/
@@ -46905,7 +46852,7 @@
 	}
 
 /***/ },
-/* 361 */
+/* 359 */
 /*!**********************************************************!*\
   !*** ./client/app/components/AuthenticatedComponent.jsx ***!
   \**********************************************************/
@@ -46924,7 +46871,7 @@
 	
 	var _reactRedux = __webpack_require__(/*! react-redux */ 172);
 	
-	var _auth = __webpack_require__(/*! ../actions/auth */ 357);
+	var _auth = __webpack_require__(/*! ../actions/auth */ 355);
 	
 	var actionCreators = _interopRequireWildcard(_auth);
 	

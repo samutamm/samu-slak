@@ -25,10 +25,9 @@ export default class extends React.Component {
         <div id="left">
           <Channels chooseChannel={this.chooseChannel} />
         </div>
-        <div id="center">
+        <div id="right">
           <Messages channel={this.state.channel}/>
         </div>
-        <div id="right"></div>
       </div>
     );
   }

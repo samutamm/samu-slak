@@ -8,27 +8,40 @@ body{
 }
 
 #messages {
-
+  overflow: hidden;
 }
 #left{
-  width: 33.33%;
-  width: calc(100% / 3);
-  display: inline-block;
+  width: 50%;
+  float: left;
 }
 
-#center{
-  width: 33.33%;
-  width: calc(100% / 3);
-  display: inline-block;
-}
 #right{
-  width: 33.33%;
-  width: calc(100% / 3);
-  display: inline-block;
+  width: 50%;
+  float: right
 }
 #allChannelsBox {
   height: 50%;
 }
 #ownChannelsBox {
   height: 50%;
+}
+
+#channelName {
+  font-weight: bold;
+}
+
+#messagesDiv {
+  min-height: 230px;
+}
+
+#messageWrap {
+  overflow: hidden;
+}
+
+#messagesTable {
+  float: bottom
+}
+
+#messageForm {
+
 }

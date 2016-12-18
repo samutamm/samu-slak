@@ -8,9 +8,10 @@ class MessageRow extends React.Component {
   }
   render() {
     const message = this.props.message;
+    var middleChar = (message.sender !== '') ? ":" : "";
     return (
       <tr>
-        <td><span>{message.sender} : {message.text}</span></td>
+        <td><span>{message.sender} {middleChar} {message.text}</span></td>
       </tr>
     );
   }
@@ -20,13 +21,15 @@ class MessageTable extends React.Component{
   render() {
     var rows = [];
     this.props.messages.forEach((message,i) => {
-      rows.push(<MessageRow message={message}
+      rows.unshift(<MessageRow message={message}
                             key={i} />);
     });
     return (
-      <table>
-        <tbody>{rows}</tbody>
-      </table>
+      <div id="messagesDiv">
+        <table id="messagesTable" >
+          <tbody>{rows}</tbody>
+        </table>
+      </div>
     );
   }
 }
@@ -45,7 +48,9 @@ class NewMessageForm extends React.Component {
 
   handleSubmit(event) {
     event.preventDefault();
-    this.props.newMessage(this.state.value, this.props.channel);
+    const message = this.state.value;
+    this.props.newMessage(message, this.props.channel);
+    this.state.value = "";
   }
 
   render() {
@@ -55,7 +60,7 @@ class NewMessageForm extends React.Component {
           Message:
           <input type="text" value={this.state.value} onChange={this.handleChange} />
         </label>
-        <input type="submit" value="Submit" />
+        <input type="submit" value="Send" />
       </form>
     );
   }
@@ -83,10 +88,10 @@ class MessagesForm extends React.Component{
     this.props.connectUserToChannel(channel, this.props.username);
     var messages = this.props.messages;
     return (
-      <div>
-        <p>{channel}</p>
+      <div id="messageWrap">
+        <p id="channelName">{channel}</p>
         <MessageTable messages={messages} />
-        <NewMessageForm newMessage={this.newMessage} channel={channel}/>
+        <NewMessageForm id="messageForm" newMessage={this.newMessage} channel={channel}/>
       </div>
     );
   }
