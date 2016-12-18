@@ -20,10 +20,13 @@ Architecture could be described as
 - UI to scale to different screen sizes
 
 ## Security
+- Logout feature
 - Apikey authentication to Messenger
+- Encryption of the contents of requests
 
 ## Maintainability
-- All three repos to be easily portable (with envs etc)
+- Refactor all three repos to be easily portable (with envs etc)
+- Remove unused dependencies from package.json and divide to dev and prod deps.
 - Create configuration server/path where each component can fetch configurations like api urls
 - Refactor samu-slak frontend-component not to make CORS requests straight to Messenger api
 but via samu-slak backend with websockets. Then it would look like
