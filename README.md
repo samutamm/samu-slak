@@ -7,6 +7,7 @@ Contains three microservices:
 - [samu-slak](https://github.com/samutamm/samu-slak)
 - [person-api](https://github.com/samutamm/personapi)
 - [messenger](https://github.com/samutamm/messenger)
+
 Architecture could be described as
 ![alt tag](docs/samu-slak-architecture.png)
 
@@ -27,3 +28,6 @@ Architecture could be described as
 - Refactor samu-slak frontend-component not to make CORS requests straight to Messenger api
 but via samu-slak backend with websockets. Then it would look like
 ![alt tag](docs/samu-slak-architecture-ideal.png)
+
+## Features
+- Slack bot integration
