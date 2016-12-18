@@ -8,7 +8,7 @@ Contains three microservices:
 - [person-api](https://github.com/samutamm/personapi)
 - [messenger](https://github.com/samutamm/messenger)
 Architecture could be described as
-[Architecture](docs/samu-slak-architecture.png)
+![alt tag](docs/samu-slak-architecture.png)
 
 # TODO
 
@@ -26,4 +26,4 @@ Architecture could be described as
 - Create configuration server/path where each component can fetch configurations like api urls
 - Refactor samu-slak frontend-component not to make CORS requests straight to Messenger api
 but via samu-slak backend with websockets. Then it would look like
-[Ideal-architecture](docs/samu-slak-architecture-ideal.png)
+![alt tag](docs/samu-slak-architecture-ideal.png)
