@@ -6,7 +6,7 @@ import {sendAuthentication} from './auth';
 
 function request() {
   return {
-    type: 'REQUEST'
+    type: 'REGISTER-REQUEST'
   };
 }
 

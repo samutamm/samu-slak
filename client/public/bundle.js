@@ -37314,12 +37314,12 @@
 
 /***/ },
 /* 297 */
-/*!***************************************************************************************************************************!*\
-  !*** external "{\"ORGANIZATION\":\"samu\",\"BASEURL\":\"http://localhost:8080\",\"AUTH_URL\":\"http://localhost:3030\"}" ***!
-  \***************************************************************************************************************************/
+/*!*****************************************************************************************************************************************************!*\
+  !*** external "{\"ORGANIZATION\":\"samu\",\"BASEURL\":\"https://tranquil-scrubland-57034.herokuapp.com/\",\"AUTH_URL\":\"http://localhost:3030\"}" ***!
+  \*****************************************************************************************************************************************************/
 /***/ function(module, exports) {
 
-	module.exports = {"ORGANIZATION":"samu","BASEURL":"http://localhost:8080","AUTH_URL":"http://localhost:3030"};
+	module.exports = {"ORGANIZATION":"samu","BASEURL":"https://tranquil-scrubland-57034.herokuapp.com/","AUTH_URL":"http://localhost:3030"};
 
 /***/ },
 /* 298 */
@@ -46837,7 +46837,7 @@
 	
 	function request() {
 	  return {
-	    type: 'REQUEST'
+	    type: 'REGISTER-REQUEST'
 	  };
 	}
 	
@@ -47120,7 +47120,7 @@
 	  var action = arguments[1];
 	
 	  switch (action.type) {
-	    case 'REQUEST':
+	    case 'REGISTER-REQUEST':
 	      return setFetchingFlag(state);
 	    case 'REGISTER_SUCCESS':
 	      return removeFetchinFlag(state);
@@ -47143,13 +47143,8 @@
 	  return state.setIn(['isRequesting'], true);
 	}
 	
-	function setAuthenticated(state, username) {
-	  var usernameAdded = state.setIn(['username'], username);
-	  return usernameAdded.setIn(['isAuthenticated'], true);
-	}
-	
 	function removeFetchinFlag(state) {
-	  return state.setIn(['isRequesting'], true);
+	  return state.setIn(['isRequesting'], false);
 	}
 	
 	function setError(state, message) {

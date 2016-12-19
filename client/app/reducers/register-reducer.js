@@ -22,7 +22,7 @@ function setError(state, message) {
 
 export default function(state = initial(), action) {
   switch (action.type) {
-  case 'REQUEST':
+  case 'REGISTER-REQUEST':
     return setFetchingFlag(state);
   case 'REGISTER_SUCCESS':
     return removeFetchinFlag(state);
