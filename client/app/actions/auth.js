@@ -37,7 +37,7 @@ function canFetch(state) {
   return !state.getIn(['session', 'isChecking']);
 }
 
-function sendAuthentication(username, password) {
+export function sendAuthentication(username, password) {
   return dispatch => {
     dispatch(request());
     axios.get('/login', {

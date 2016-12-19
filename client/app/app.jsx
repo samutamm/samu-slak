@@ -10,9 +10,11 @@ import { routerReducer, syncHistoryWithStore, routerActions, routerMiddleware } 
 import MainLayout from './components/layouts/main-layout.jsx';
 import MessagesLayout from './components/layouts/messages-layout.jsx';
 import {LoginContainer} from './components/login.jsx';
+import {NicknameContainer} from './components/chooseNickname.jsx';
 import authReducer from './reducers/auth-reducer';
 import channelsReducer from './reducers/channels-reducer';
 import messagesReducer from './reducers/messages-reducer';
+import registerReducer from './reducers/register-reducer';
 import {requireAuthentication} from './components/AuthenticatedComponent.jsx';
 
 
@@ -24,7 +26,8 @@ const reducer = combineReducers({
   routing: routerReducer,
   auth: authReducer,
   channels: channelsReducer,
-  messages: messagesReducer
+  messages: messagesReducer,
+  register: registerReducer
 });
 
 const store = createStore(
@@ -44,6 +47,7 @@ render(
       <Route component={MainLayout}>
         <Redirect from="/" to="messages"/>
         <Route path="/login" component={LoginContainer} />
+        <Route path="/register" component={NicknameContainer} />
       </Route>
       <Route path="/messages" component={requireAuthentication(MessagesLayout)} />
     </Router>

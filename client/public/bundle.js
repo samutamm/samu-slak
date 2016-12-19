@@ -85,19 +85,25 @@
 	
 	var _login = __webpack_require__(/*! ./components/login.jsx */ 354);
 	
-	var _authReducer = __webpack_require__(/*! ./reducers/auth-reducer */ 356);
+	var _chooseNickname = __webpack_require__(/*! ./components/chooseNickname.jsx */ 356);
+	
+	var _authReducer = __webpack_require__(/*! ./reducers/auth-reducer */ 358);
 	
 	var _authReducer2 = _interopRequireDefault(_authReducer);
 	
-	var _channelsReducer = __webpack_require__(/*! ./reducers/channels-reducer */ 357);
+	var _channelsReducer = __webpack_require__(/*! ./reducers/channels-reducer */ 359);
 	
 	var _channelsReducer2 = _interopRequireDefault(_channelsReducer);
 	
-	var _messagesReducer = __webpack_require__(/*! ./reducers/messages-reducer */ 358);
+	var _messagesReducer = __webpack_require__(/*! ./reducers/messages-reducer */ 360);
 	
 	var _messagesReducer2 = _interopRequireDefault(_messagesReducer);
 	
-	var _AuthenticatedComponent = __webpack_require__(/*! ./components/AuthenticatedComponent.jsx */ 359);
+	var _registerReducer = __webpack_require__(/*! ./reducers/register-reducer */ 361);
+	
+	var _registerReducer2 = _interopRequireDefault(_registerReducer);
+	
+	var _AuthenticatedComponent = __webpack_require__(/*! ./components/AuthenticatedComponent.jsx */ 362);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -109,7 +115,8 @@
 	  routing: _reactRouterRedux.routerReducer,
 	  auth: _authReducer2.default,
 	  channels: _channelsReducer2.default,
-	  messages: _messagesReducer2.default
+	  messages: _messagesReducer2.default,
+	  register: _registerReducer2.default
 	});
 	
 	var store = (0, _redux.createStore)(reducer, (0, _redux.applyMiddleware)(loggerMiddleware, _reduxThunk2.default, routingMiddleware));
@@ -126,7 +133,8 @@
 	      _reactRouter.Route,
 	      { component: _mainLayout2.default },
 	      _react2.default.createElement(_reactRouter.Redirect, { from: '/', to: 'messages' }),
-	      _react2.default.createElement(_reactRouter.Route, { path: '/login', component: _login.LoginContainer })
+	      _react2.default.createElement(_reactRouter.Route, { path: '/login', component: _login.LoginContainer }),
+	      _react2.default.createElement(_reactRouter.Route, { path: '/register', component: _chooseNickname.NicknameContainer })
 	    ),
 	    _react2.default.createElement(_reactRouter.Route, { path: '/messages', component: (0, _AuthenticatedComponent.requireAuthentication)(_messagesLayout2.default) })
 	  )
@@ -46481,12 +46489,12 @@
 	            { type: 'submit',
 	              onClick: this.handleLogin },
 	            'Log in'
+	          ),
+	          _react2.default.createElement(
+	            _reactRouter.Link,
+	            { to: '/register' },
+	            'or choose a nickname here'
 	          )
-	        ),
-	        _react2.default.createElement(
-	          'p',
-	          null,
-	          'At the moment registration is not possible (on TODO)'
 	        ),
 	        _react2.default.createElement(
 	          'p',
@@ -46523,6 +46531,7 @@
 	  value: true
 	});
 	exports.receiveToken = receiveToken;
+	exports.sendAuthentication = sendAuthentication;
 	exports.authenticate = authenticate;
 	exports.checkToken = checkToken;
 	exports.logoutAndRedirect = logoutAndRedirect;
@@ -46653,6 +46662,248 @@
 
 /***/ },
 /* 356 */
+/*!**************************************************!*\
+  !*** ./client/app/components/chooseNickname.jsx ***!
+  \**************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.NicknameContainer = undefined;
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _react = __webpack_require__(/*! react */ 1);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactRedux = __webpack_require__(/*! react-redux */ 172);
+	
+	var _register = __webpack_require__(/*! ../actions/register */ 357);
+	
+	var actionCreators = _interopRequireWildcard(_register);
+	
+	var _reactRouter = __webpack_require__(/*! react-router */ 209);
+	
+	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var ChooseNicknameForm = function (_React$Component) {
+	  _inherits(ChooseNicknameForm, _React$Component);
+	
+	  function ChooseNicknameForm(props) {
+	    _classCallCheck(this, ChooseNicknameForm);
+	
+	    var _this = _possibleConstructorReturn(this, (ChooseNicknameForm.__proto__ || Object.getPrototypeOf(ChooseNicknameForm)).call(this, props));
+	
+	    _this.handleSubmit = _this.handleSubmit.bind(_this);
+	    _this.state = {
+	      message: ''
+	    };
+	    return _this;
+	  }
+	
+	  _createClass(ChooseNicknameForm, [{
+	    key: 'handleSubmit',
+	    value: function handleSubmit(e) {
+	      e.preventDefault();
+	      if (this.refs.password.value !== this.refs.passwordAgain.value) {
+	        this.setState({
+	          message: "Passwords are not same!"
+	        });
+	      } else {
+	        this.props.register(this.refs.username.value, this.refs.password.value);
+	      }
+	    }
+	  }, {
+	    key: 'render',
+	    value: function render() {
+	      return _react2.default.createElement(
+	        'div',
+	        null,
+	        _react2.default.createElement(
+	          'form',
+	          null,
+	          _react2.default.createElement(
+	            'h3',
+	            null,
+	            ' Choose nickname: '
+	          ),
+	          _react2.default.createElement(
+	            'ul',
+	            null,
+	            _react2.default.createElement(
+	              'span',
+	              null,
+	              'Nickname '
+	            ),
+	            _react2.default.createElement('input', { type: 'text',
+	              ref: 'username' })
+	          ),
+	          _react2.default.createElement(
+	            'ul',
+	            null,
+	            _react2.default.createElement(
+	              'span',
+	              null,
+	              'Password '
+	            ),
+	            _react2.default.createElement('input', { type: 'text',
+	              ref: 'password' })
+	          ),
+	          _react2.default.createElement(
+	            'ul',
+	            null,
+	            _react2.default.createElement(
+	              'span',
+	              null,
+	              'Password again'
+	            ),
+	            _react2.default.createElement('input', { type: 'text',
+	              ref: 'passwordAgain' })
+	          ),
+	          _react2.default.createElement(
+	            'button',
+	            { type: 'submit',
+	              onClick: this.handleSubmit },
+	            'Create'
+	          )
+	        ),
+	        _react2.default.createElement(
+	          'p',
+	          null,
+	          this.props.message
+	        ),
+	        _react2.default.createElement(
+	          'p',
+	          null,
+	          this.state.message
+	        )
+	      );
+	    }
+	  }]);
+	
+	  return ChooseNicknameForm;
+	}(_react2.default.Component);
+	
+	function mapStateToProps(state) {
+	  return {
+	    message: state.register.getIn(['message'])
+	  };
+	}
+	
+	var NicknameContainer = exports.NicknameContainer = (0, _reactRedux.connect)(mapStateToProps, actionCreators)(ChooseNicknameForm);
+
+/***/ },
+/* 357 */
+/*!****************************************!*\
+  !*** ./client/app/actions/register.js ***!
+  \****************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.registerSuccess = registerSuccess;
+	exports.register = register;
+	
+	var _immutable = __webpack_require__(/*! immutable */ 271);
+	
+	var _axios = __webpack_require__(/*! axios */ 272);
+	
+	var _axios2 = _interopRequireDefault(_axios);
+	
+	var _reactRouter = __webpack_require__(/*! react-router */ 209);
+	
+	var _Config = __webpack_require__(/*! Config */ 297);
+	
+	var _Config2 = _interopRequireDefault(_Config);
+	
+	var _auth = __webpack_require__(/*! ./auth */ 355);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function request() {
+	  return {
+	    type: 'REQUEST'
+	  };
+	}
+	
+	function registerSuccess(token, username) {
+	  return {
+	    type: 'REGISTER_SUCCESS',
+	    session: token,
+	    username: username
+	  };
+	}
+	
+	function receiveError(message) {
+	  return {
+	    type: 'RECEIVE_REGISTER_ERROR',
+	    error: message
+	  };
+	}
+	
+	function canFetch(state) {
+	  return !state.getIn(['isRequesting']);
+	}
+	
+	function sendRegistration(username, password) {
+	  return function (dispatch) {
+	    dispatch(request());
+	    // sended data is in the form of model on server
+	    (0, _axios2.default)({
+	      url: '/register',
+	      data: {
+	        name: username,
+	        email: '',
+	        address: '',
+	        username: username,
+	        password: password,
+	        role: ''
+	      },
+	      method: 'post',
+	      baseURL: _Config2.default.AUTH_URL,
+	      validateStatus: function validateStatus(status) {
+	        return status >= 200 && status < 300 || status === 409;
+	      }
+	    }).then(function (response) {
+	      if (response.status === 409) {
+	        dispatch(receiveError('Nickname ' + username + " is reserved! Please choose an other one."));
+	      } else {
+	        dispatch(registerSuccess());
+	        dispatch((0, _auth.sendAuthentication)(username, password));
+	      }
+	    }).catch(function (error) {
+	      dispatch(receiveError('Error while creating nickname. Please check credentials.'));
+	    });
+	  };
+	}
+	
+	function register(username, password) {
+	  return function (dispatch, getState) {
+	    if (canFetch(getState().register)) {
+	      return dispatch(sendRegistration(username, password));
+	    } else {
+	      return Promise.resolve();
+	    }
+	  };
+	}
+
+/***/ },
+/* 358 */
 /*!*********************************************!*\
   !*** ./client/app/reducers/auth-reducer.js ***!
   \*********************************************/
@@ -46721,7 +46972,7 @@
 	}
 
 /***/ },
-/* 357 */
+/* 359 */
 /*!*************************************************!*\
   !*** ./client/app/reducers/channels-reducer.js ***!
   \*************************************************/
@@ -46790,7 +47041,7 @@
 	}
 
 /***/ },
-/* 358 */
+/* 360 */
 /*!*************************************************!*\
   !*** ./client/app/reducers/messages-reducer.js ***!
   \*************************************************/
@@ -46852,7 +47103,62 @@
 	}
 
 /***/ },
-/* 359 */
+/* 361 */
+/*!*************************************************!*\
+  !*** ./client/app/reducers/register-reducer.js ***!
+  \*************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	exports.default = function () {
+	  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initial();
+	  var action = arguments[1];
+	
+	  switch (action.type) {
+	    case 'REQUEST':
+	      return setFetchingFlag(state);
+	    case 'REGISTER_SUCCESS':
+	      return removeFetchinFlag(state);
+	    case 'RECEIVE_REGISTER_ERROR':
+	      return setError(state, action.error);
+	  }
+	  return state;
+	};
+	
+	var _immutable = __webpack_require__(/*! immutable */ 271);
+	
+	function initial() {
+	  return (0, _immutable.Map)({
+	    message: '',
+	    isRequesting: false
+	  });
+	}
+	
+	function setFetchingFlag(state) {
+	  return state.setIn(['isRequesting'], true);
+	}
+	
+	function setAuthenticated(state, username) {
+	  var usernameAdded = state.setIn(['username'], username);
+	  return usernameAdded.setIn(['isAuthenticated'], true);
+	}
+	
+	function removeFetchinFlag(state) {
+	  return state.setIn(['isRequesting'], true);
+	}
+	
+	function setError(state, message) {
+	  var newState = state.setIn(['message'], message);
+	  return newState.setIn(['isRequesting'], false);
+	}
+
+/***/ },
+/* 362 */
 /*!**********************************************************!*\
   !*** ./client/app/components/AuthenticatedComponent.jsx ***!
   \**********************************************************/
