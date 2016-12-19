@@ -11,13 +11,8 @@ function setFetchingFlag(state) {
   return state.setIn(['isRequesting'], true);
 }
 
-function setAuthenticated(state, username) {
-  const usernameAdded = state.setIn(['username'], username);
-  return usernameAdded.setIn(['isAuthenticated'], true);
-}
-
 function removeFetchinFlag(state) {
-  return state.setIn(['isRequesting'], true);
+  return state.setIn(['isRequesting'], false);
 }
 
 function setError(state, message) {
